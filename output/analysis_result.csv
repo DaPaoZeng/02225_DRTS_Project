@@ -1,0 +1,19 @@
+component_id,core_id,scheduler,alpha,delta,schedulable
+Bitmap_Processor,Core_1,EDF (fallback),0.23,0,True
+Camera_Sensor,Core_1,EDF (fallback),0.32,0,True
+Communication_Unit,Core_3,EDF (fallback),0.11,0,True
+Control_Unit,Core_2,EDF,0.23,0,True
+GPS_Sensor,Core_3,EDF (fallback),0.1,0,True
+Humidity_Sensor,Core_7,EDF (fallback),0.69,0,True
+Image_Processor,Core_1,EDF,0.12,0,True
+Infrared_Sensor,Core_5,EDF (fallback),0.2,0,True
+Laser_Sensor,Core_5,EDF (fallback),0.32,0,True
+Lidar_Sensor,Core_2,EDF (fallback),0.36,0,True
+Light_Sensor,Core_8,EDF (fallback),0.1,0,True
+Pressure_Sensor,Core_7,EDF (fallback),0.11,0,True
+Proximity_Sensor,Core_3,EDF,0.11,0,True
+Radar_Sensor,Core_4,EDF,0.72,0,True
+Sonar_Sensor,Core_4,EDF (fallback),0.27,0,True
+Temperature_Sensor,Core_8,EDF,0.37,0,True
+Thermal_Sensor,Core_6,EDF,0.23,0,True
+Ultraviolet_Sensor,Core_6,EDF,0.13,0,True
