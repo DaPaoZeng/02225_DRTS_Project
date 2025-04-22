@@ -1,0 +1,2 @@
+component_id,core_id,scheduler,alpha,delta,schedulable
+Camera_Sensor,Core_1,EDF (fallback),0.61,0,True

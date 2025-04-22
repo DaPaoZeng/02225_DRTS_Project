@@ -1,0 +1,5 @@
+component_id,core_id,scheduler,Q,P
+Camera_Sensor,Core_1,EDF (fallback),125.62,130.0
+Control_Unit,Core_2,EDF,59.8,130.0
+Image_Processor,Core_1,EDF,62.79,130.0
+Lidar_Sensor,Core_2,EDF (fallback),20.93,130.0

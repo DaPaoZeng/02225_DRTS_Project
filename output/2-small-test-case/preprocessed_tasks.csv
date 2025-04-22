@@ -1,0 +1,10 @@
+component_id,scheduler,core_id,task_name,wcet,period,priority
+Camera_Sensor,RM,Core_1,Task_0,3,150,1.0
+Camera_Sensor,RM,Core_1,Task_1,28,200,2.0
+Camera_Sensor,RM,Core_1,Task_2,2,50,0.0
+Camera_Sensor,RM,Core_1,Task_3,24,300,3.0
+Image_Processor,EDF,Core_1,Task_4,2,200,
+Image_Processor,EDF,Core_1,Task_5,11,200,
+Image_Processor,EDF,Core_1,Task_6,17,400,
+Image_Processor,EDF,Core_1,Task_7,13,300,
+Image_Processor,EDF,Core_1,Task_8,3,150,

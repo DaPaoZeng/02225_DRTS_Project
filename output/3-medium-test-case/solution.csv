@@ -1,0 +1,5 @@
+component_id,core_id,scheduler,schedulable,max_response_time,avg_response_time
+Camera_Sensor,Core_1,EDF,True,981,129.35
+Control_Unit,Core_2,EDF,True,170,63.4
+Image_Processor,Core_1,EDF,True,146,37.46
+Lidar_Sensor,Core_2,EDF,True,242,58.32

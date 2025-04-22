@@ -1,0 +1,2 @@
+component_id,core_id,scheduler,schedulable,max_response_time,avg_response_time
+Camera_Sensor,Core_1,EDF,True,155,87.51

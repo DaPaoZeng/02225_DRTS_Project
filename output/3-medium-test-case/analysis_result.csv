@@ -1,0 +1,5 @@
+component_id,core_id,scheduler,alpha,delta,schedulable
+Camera_Sensor,Core_1,EDF (fallback),0.73,0,True
+Control_Unit,Core_2,EDF,0.4,0,True
+Image_Processor,Core_1,EDF,0.42,0,True
+Lidar_Sensor,Core_2,EDF (fallback),0.14,0,True

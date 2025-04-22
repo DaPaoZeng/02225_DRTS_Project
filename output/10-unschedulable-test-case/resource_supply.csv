@@ -1,0 +1,35 @@
+component_id,core_id,scheduler,Q,P
+Acceleration_Sensor,Core_10,EDF (fallback),62.79,130.0
+Altimeter_Sensor,Core_12,EDF,10.46,130.0
+Anemometer_Sensor,Core_14,EDF (fallback),50.83,130.0
+Barometer_Sensor,Core_13,EDF,88.2,130.0
+Bitmap_Processor,Core_1,EDF (fallback),29.9,130.0
+Camera_Sensor,Core_1,EDF (fallback),125.62,130.0
+Communication_Unit,Core_3,EDF (fallback),14.95,130.0
+Compass_Sensor,Core_12,EDF (fallback),11.96,130.0
+Control_Unit,Core_2,EDF,22.42,130.0
+GPS_Sensor,Core_3,EDF (fallback),14.95,130.0
+Gyroscope_Sensor,Core_11,EDF,29.9,130.0
+Humidity_Sensor,Core_7,RM,299.0,130.0
+Hygrometer_Sensor,Core_13,EDF (fallback),35.88,130.0
+Image_Processor,Core_1,EDF,14.95,130.0
+Infrared_Sensor,Core_5,EDF (fallback),40.37,130.0
+Laser_Sensor,Core_5,EDF (fallback),49.34,130.0
+Lidar_Sensor,Core_2,EDF (fallback),31.39,130.0
+Light_Sensor,Core_8,EDF (fallback),34.39,130.0
+Magnetometer_Sensor,Core_11,EDF (fallback),14.95,130.0
+Motion_Sensor,Core_10,EDF (fallback),43.35,130.0
+Photometer_Sensor,Core_16,EDF (fallback),65.78,130.0
+Pressure_Sensor,Core_7,EDF (fallback),13.46,130.0
+Proximity_Sensor,Core_3,EDF,14.95,130.0
+Pyrometer_Sensor,Core_16,EDF (fallback),10.46,130.0
+Radar_Sensor,Core_4,EDF,89.7,130.0
+Rain_Gauge_Sensor,Core_14,EDF (fallback),31.39,130.0
+Snow_Gauge_Sensor,Core_15,EDF,19.43,130.0
+Sonar_Sensor,Core_4,EDF (fallback),38.87,130.0
+Sound_Sensor,Core_9,EDF (fallback),26.91,130.0
+Temperature_Sensor,Core_8,EDF,104.65,130.0
+Thermal_Sensor,Core_6,EDF,50.83,130.0
+Thermometer_Sensor,Core_15,EDF,28.4,130.0
+Ultraviolet_Sensor,Core_6,EDF,23.92,130.0
+Vibration_Sensor,Core_9,EDF,8.97,130.0

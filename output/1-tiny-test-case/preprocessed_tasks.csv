@@ -1,0 +1,3 @@
+component_id,scheduler,core_id,task_name,wcet,period,priority
+Camera_Sensor,RM,Core_1,Task_0,14,50,0
+Camera_Sensor,RM,Core_1,Task_1,33,100,1
