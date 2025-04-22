@@ -1,0 +1,3 @@
+[submodule "DRTS_Project-Test-Cases"]
+	path = DRTS_Project-Test-Cases
+	url = git@github.com:DaPaoZeng/02225-DRTS.git
