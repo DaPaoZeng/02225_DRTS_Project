@@ -1,20 +1,20 @@
 import pandas as pd
-
+import config
 from auto_tuner import auto_tune_supply
 
 # 自动生成 resource_supply.csv（来自分析结果自动调参）
 auto_tune_supply(
-    task_path="data/huge/tasks.csv",
-    arch_path="data/huge/architecture.csv",
-    sched_path="output/analysis_result.csv",
-    output_path="output/resource_supply.csv"
+    task_path=config.TASKS_PATH,
+    arch_path=config.ARCH_PATH,
+    sched_path=config.ANALYSIS_RESULT_PATH,
+    output_path=config.RESOURCE_SUPPLY_PATH
 )
 
 
 
 # === 输入输出路径 ===
-input_path = "output/analysis_result.csv"
-output_path = "output/resource_supply.csv"
+input_path = config.ANALYSIS_RESULT_PATH
+output_path = config.RESOURCE_SUPPLY_PATH
 
 # === 加载分析器输出结果 ===
 analysis_df = pd.read_csv(input_path)

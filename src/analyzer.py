@@ -1,8 +1,9 @@
 import pandas as pd
 import math
+import config
 
 # === 读取预处理任务文件 ===
-df = pd.read_csv("output/preprocessed_tasks.csv")
+df = pd.read_csv(config.PREPROCESSED_TASKS_PATH)
 
 # === 定义 DBF（RM 版本） ===
 def dbf_rm(taskset, t, task_index):
@@ -80,5 +81,5 @@ for comp_id, group in grouped:
 
 # === 输出分析结果 ===
 output_df = pd.DataFrame(results)
-output_df.to_csv("output/analysis_result.csv", index=False)
+output_df.to_csv(config.ANALYSIS_RESULT_PATH, index=False)  # 使用配置文件中的路径
 print("\n✅ 分析完成，结果保存在 analysis_result.csv")

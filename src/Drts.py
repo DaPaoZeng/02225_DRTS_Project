@@ -1,6 +1,7 @@
 import pandas as pd
 from dataclasses import dataclass, field
 from typing import List
+import config
 
 # === 定义 Task 和 Component 类 ===
 @dataclass
@@ -19,9 +20,9 @@ class Component:
     tasks: List[Task] = field(default_factory=list)
 
 # === 读取 CSV 文件 ===
-tasks_df = pd.read_csv("data/huge/tasks.csv")
-budgets_df = pd.read_csv("data/huge/budgets.csv")            # 提供 component 的 scheduler 和 core
-architecture_df = pd.read_csv("data/huge/architecture.csv")  # 提供 core 的性能参数（可选）
+tasks_df = pd.read_csv(config.TASKS_PATH)
+budgets_df = pd.read_csv(config.BUDGETS_PATH)  # 提供 component 的 scheduler 和 core
+architecture_df = pd.read_csv(config.ARCH_PATH)  # 提供 core 的性能参数（可选）
 
 # === 构建组件对象 ===
 components = {}
@@ -68,7 +69,8 @@ for comp in components.values():
 
         # 保存为 CSV
         output_df = pd.DataFrame(output_rows)
-        output_df.to_csv("output/preprocessed_tasks.csv", index=False)
+        output_df.to_csv(config.PREPROCESSED_TASKS_PATH, index=False)
 
-        print("✅ 已保存为 preprocessed_tasks.csv")
+        print(f"✅ 已保存为 preprocessed_tasks.csv，路径为 {config.PREPROCESSED_TASKS_PATH}")
+
 

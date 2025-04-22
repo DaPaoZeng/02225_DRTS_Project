@@ -2,12 +2,13 @@
 import pandas as pd
 import numpy as np
 import os
+import config  # 导入配置文件
 
 # === 参数路径 ===
-TASKS_PATH = "data/huge/tasks.csv"
-ARCH_PATH = "data/huge/architecture.csv"
-ANALYSIS_PATH = "output/analysis_result.csv"
-OUTPUT_PATH = "output/solution.csv"
+TASKS_PATH = config.TASKS_PATH
+ARCH_PATH = config.ARCH_PATH
+ANALYSIS_PATH = config.ANALYSIS_RESULT_PATH
+OUTPUT_PATH = config.SOLUTION_PATH
 SIM_TIME = 5000
 P_FIXED = 130.0
 
