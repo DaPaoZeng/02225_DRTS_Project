@@ -1,0 +1,19 @@
+component_id,core_id,scheduler,Q,P
+Bitmap_Processor,Core_1,EDF (fallback),34.39,130.0
+Camera_Sensor,Core_1,EDF (fallback),125.62,130.0
+Communication_Unit,Core_3,EDF (fallback),16.45,130.0
+Control_Unit,Core_2,EDF,38.87,130.0
+GPS_Sensor,Core_3,EDF (fallback),14.95,130.0
+Humidity_Sensor,Core_7,EDF (fallback),103.15,130.0
+Image_Processor,Core_1,EDF,17.94,130.0
+Infrared_Sensor,Core_5,EDF (fallback),29.9,130.0
+Laser_Sensor,Core_5,EDF (fallback),47.84,130.0
+Lidar_Sensor,Core_2,EDF (fallback),53.82,130.0
+Light_Sensor,Core_8,EDF (fallback),14.95,130.0
+Pressure_Sensor,Core_7,EDF (fallback),16.45,130.0
+Proximity_Sensor,Core_3,EDF,16.45,130.0
+Radar_Sensor,Core_4,EDF,107.64,130.0
+Sonar_Sensor,Core_4,EDF (fallback),40.37,130.0
+Temperature_Sensor,Core_8,EDF,58.3,130.0
+Thermal_Sensor,Core_6,EDF,34.39,130.0
+Ultraviolet_Sensor,Core_6,EDF,19.43,130.0
