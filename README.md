@@ -44,13 +44,14 @@
 │   ├── analysis_result.csv       # 记录任务调度的分析结果
 │   ├── resource_supply.csv       # 记录调优后的资源供应数据
 │   └── solution.csv             # 记录最终解决方案数据
-└── src/
-    ├── analyzer.py
-    ├── solution_check.py
-    ├── config.py
-    ├── Drts.py
-    ├── sim.py
-    └── simulate_full_auto.py
+├── src/
+│   ├── analyzer.py
+│   ├── solution_check.py
+│   ├── config.py
+│   ├── Drts.py
+│   ├── sim.py
+│   └── simulate_full_auto.py
+└── main.py #批处理
 ```
 
 ### 各目录 / 文件说明
@@ -64,6 +65,7 @@
   | **`simulate_full_auto.py`** | 结合任务、服务器供给、核心分配进行完整离线仿真，生成 `solution.csv` |
   | **`check_solution.py`** | 快速校验 `solution.csv` 是否存在 deadline miss，并给出统计摘要 |
   | **`config.py`** | 统一配置（数据集路径、输出目录等），一处修改全流程生效 |
+  | **`main.py`** | 批处理 |
 
 - **`/config`**：同上，当前仅含 `config.py`（已在表中列出）。
 
@@ -81,67 +83,56 @@
 ## 4. 代码使用说明
 
 ### 如何运行代码：
+方法 1：批量处理10个示例，处理结果按case分类一次性保存到output目录下。
+    直接运行 main.py 文件，不需要改动任何内容。
 
+方法 2：按指定cese手动执行py文件进行调试。
 1. **修改路径配置**：
    - 打开 `config/config.py` 文件。
    - 根据自己的项目目录结构，修改以下路径为绝对路径：
-   
    ```python
    # config.py
-
    import os
-
    BASE_PATH = "/Users/Zayne/DTU/S2/Distributed Real-Time Systems/02225_DRTS/DRTS_Project-Test-Cases/9-unschedulable-test-case"  # 数据集路径
    TASKS_PATH = os.path.join(BASE_PATH, "tasks.csv")
    ARCH_PATH = os.path.join(BASE_PATH, "architecture.csv")
    BUDGETS_PATH = os.path.join(BASE_PATH, "budgets.csv")
-
    OUTPUT_DIR = "/Users/Zayne/DTU/S2/Distributed Real-Time Systems/02225_DRTS/output/9-unschedulable-test-case"  # 输出路径
-
    ANALYSIS_RESULT_PATH = os.path.join(OUTPUT_DIR, "analysis_result.csv")
    RESOURCE_SUPPLY_PATH = os.path.join(OUTPUT_DIR, "resource_supply.csv")
    SOLUTION_PATH = os.path.join(OUTPUT_DIR, "solution.csv")
    PREPROCESSED_TASKS_PATH = os.path.join(OUTPUT_DIR, "preprocessed_tasks.csv")
-
-
-### 运行顺序（4 步即可）
-
-1. **`Drts.py`**  
-   读取 *tasks / architecture / budgets* → 生成 **`preprocessed_tasks.csv`**
-
-2. **`analyzer.py`**  
-   读取 `preprocessed_tasks.csv` → 计算每个组件的 (α, Δ) 与可调度性 → 输出 **`analysis_result.csv`**
-
-3. **`sim.py`**  
-   把 (α, Δ) 按 *Half-Half* 定理转换为服务器参数 (Q,P) → 输出 **`resource_supply.csv`**
-
-4. **`simulate_full_auto.py`**  
-   综合任务、服务器供给和核心映射执行离线仿真 → 生成 **`solution.csv`**
-
-> 可选：运行 **`check_solution.py`** 对 `solution.csv` 做一键验证，快速查看有无 deadline-miss。
+2. **运行顺序**：
+    (1). **`Drts.py`**  
+       读取 *tasks / architecture / budgets* → 生成 **`preprocessed_tasks.csv`**
+    (2). **`analyzer.py`**  
+       读取 `preprocessed_tasks.csv` → 计算每个组件的 (α, Δ) 与可调度性 → 输出 **`analysis_result.csv`**
+    (3). **`sim.py`**  
+       把 (α, Δ) 按 *Half-Half* 定理转换为服务器参数 (Q,P) → 输出 **`resource_supply.csv`**
+    (4). **`simulate_full_auto.py`**  
+       综合任务、服务器供给和核心映射执行离线仿真 → 生成 **`solution.csv`**
+    (可选)：运行 **`check_solution.py`** 对 `solution.csv` 做一键验证，快速查看有无 deadline-miss。
 
 ---
 
 ## 5. 运行示例
+方法1：
+```bash
+python run_batch.py
 
-直接运行main文件将批量运行10个示例。
-
+方法2：
 ```bash
 # Step-1 预处理
 python src/Drts.py
 #  → output/.../preprocessed_tasks.csv
-
 # Step-2 组件级分析
 python src/analyzer.py
 #  → output/.../analysis_result.csv
-
 # Step-3 Half-Half 转换
 python src/sim.py
 #  → output/.../resource_supply.csv
-
 # Step-4 完整仿真
 python src/simulate_full_auto.py
 #  → output/.../solution.csv
-
 # (可选) Step-5 快速检查
 python src/check_solution.py
