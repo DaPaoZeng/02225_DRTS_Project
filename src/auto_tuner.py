@@ -9,7 +9,7 @@ def auto_tune_supply(task_path, arch_path, sched_path, output_path):
     if "component_schedulable" in sched_df.columns:
         sched_map = {row["component_id"]: row["component_schedulable"] for _, row in sched_df.iterrows()}
     else:
-        print("⚠️ 警告：未找到 'component_schedulable' 列，默认全部设为可调度（1）")
+        # print("⚠️ 警告：未找到 'component_schedulable' 列，默认全部设为可调度（1）")
         sched_map = {row["component_id"]: 1 for _, row in sched_df.iterrows()}
 
     result = []
