@@ -83,11 +83,13 @@
 ## 4. 代码使用说明
 
 ### 如何运行代码：
-方法 1：批量处理10个示例，处理结果按case分类一次性保存到output目录下。
+
+**方法 1**：批量处理10个示例，处理结果按case分类一次性保存到output目录下。
+
     直接运行 main.py 文件，不需要改动任何内容。
 
-方法 2：按指定cese手动执行py文件进行调试。
-1. **修改路径配置**：
+**方法 2**：按指定cese手动执行py文件进行调试。
+1. 修改路径配置**：
    - 打开 `config/config.py` 文件。
    - 根据自己的项目目录结构，修改以下路径为绝对路径：
    ```python
@@ -102,15 +104,19 @@
    RESOURCE_SUPPLY_PATH = os.path.join(OUTPUT_DIR, "resource_supply.csv")
    SOLUTION_PATH = os.path.join(OUTPUT_DIR, "solution.csv")
    PREPROCESSED_TASKS_PATH = os.path.join(OUTPUT_DIR, "preprocessed_tasks.csv")
-2. **运行顺序**：
+2. 运行顺序：
     (1). **`Drts.py`**  
        读取 *tasks / architecture / budgets* → 生成 **`preprocessed_tasks.csv`**
+   
     (2). **`analyzer.py`**  
        读取 `preprocessed_tasks.csv` → 计算每个组件的 (α, Δ) 与可调度性 → 输出 **`analysis_result.csv`**
+   
     (3). **`sim.py`**  
        把 (α, Δ) 按 *Half-Half* 定理转换为服务器参数 (Q,P) → 输出 **`resource_supply.csv`**
+   
     (4). **`simulate_full_auto.py`**  
        综合任务、服务器供给和核心映射执行离线仿真 → 生成 **`solution.csv`**
+   
     (可选)：运行 **`check_solution.py`** 对 `solution.csv` 做一键验证，快速查看有无 deadline-miss。
 
 ---
@@ -119,6 +125,7 @@
 方法1：
 ```bash
 python run_batch.py
+```
 
 方法2：
 ```bash
@@ -136,3 +143,4 @@ python src/simulate_full_auto.py
 #  → output/.../solution.csv
 # (可选) Step-5 快速检查
 python src/check_solution.py
+```
