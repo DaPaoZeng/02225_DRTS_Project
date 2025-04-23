@@ -1,159 +1,136 @@
+import pandas as pd, os, math
+import config
 
-import pandas as pd
-import numpy as np
-import os
-import config  # 导入配置文件
+"""simulate_full_auto.py — 两级分层仿真 (Deadline‑miss fix + verbose)"""
 
-# === 参数路径 ===
-TASKS_PATH = config.TASKS_PATH
-ARCH_PATH = config.ARCH_PATH
-ANALYSIS_PATH = config.ANALYSIS_RESULT_PATH
-OUTPUT_PATH = config.SOLUTION_PATH
-SIM_TIME = 5000
-P_FIXED = 130.0
+QUANTUM   = 1.0    # 执行粒度 (TU)
+SIM_TIME  = 5000   # 仿真总时长 (TU)
+EPS       = 1e-6   # 浮点容差
 
-# === 加载数据 ===
-tasks_df = pd.read_csv(TASKS_PATH)
-arch_df = pd.read_csv(ARCH_PATH)
-analysis_df = pd.read_csv(ANALYSIS_PATH)
+# --------------------------------------------------
+# 读取输入
+# --------------------------------------------------
+tasks_df  = pd.read_csv(config.TASKS_PATH)
+arch_df   = pd.read_csv(config.ARCH_PATH)
+supply_df = pd.read_csv(config.RESOURCE_SUPPLY_PATH)
+print(f"=== Simulator: tasks={len(tasks_df)}, cores={len(arch_df)}, supplies={len(supply_df)} ===")
 
-core_speed = dict(zip(arch_df["core_id"], arch_df["speed_factor"]))
-core_list = arch_df["core_id"].tolist()
+# 核心信息
+a_core = {row.core_id: {"speed": row.speed_factor,
+                        "scheduler": row.scheduler.strip().upper()} for _, row in arch_df.iterrows()}
 
-# === 自动调参：最小可调度 Q 搜索 ===
-supply_map = {}
-grouped_tasks = dict(tuple(tasks_df.groupby("component_id")))
+# BDR → 供给
+a_supply = supply_df.set_index("component_id").to_dict("index")
 
-for i, (_, row) in enumerate(analysis_df.iterrows()):
-    comp_id = row["component_id"]
-    core_id = row["core_id"]
-    scheduler = row["scheduler"].strip().upper()
-    if "EDF" in scheduler:
-        scheduler = "EDF"
-    elif "RM" in scheduler:
-        scheduler = "RM"
-    else:
-        scheduler = "EDF"
-
-    if comp_id not in grouped_tasks or core_id not in core_speed:
+# --------------------------------------------------
+# 构建组件结构
+# --------------------------------------------------
+components = {}
+for _, row in tasks_df.iterrows():
+    cid = row.component_id
+    if cid not in a_supply:
+        print(f"[WARN] {row.task_name} 的 component {cid} 无供给条目，跳过")
         continue
-
-    group = grouped_tasks[comp_id]
-    speed = core_speed[core_id]
-
-    def simulate(Q):
-        task_pool = []
-        supply_budget = 0.0
-        for t in range(SIM_TIME):
-            if t % P_FIXED == 0:
-                supply_budget += Q
-            for _, task in group.iterrows():
-                if t % task["period"] == 0:
-                    task_pool.append({
-                        "name": task["task_name"],
-                        "remaining": float(task["wcet"]) / speed,
-                        "release": t,
-                        "deadline": t + task["period"],
-                        "priority": task["priority"]
-                    })
-            while supply_budget >= 1.0 and task_pool:
-                if scheduler == "RM":
-                    task_pool.sort(key=lambda x: x["priority"])
-                elif scheduler == "EDF":
-                    task_pool.sort(key=lambda x: x["deadline"])
-                else:
-                    task_pool.sort(key=lambda x: x["release"])
-                current = task_pool[0]
-                exec_amount = min(current["remaining"], 1.0)
-                current["remaining"] -= exec_amount
-                supply_budget -= exec_amount
-                if current["remaining"] <= 0.0001:
-                    task_pool.pop(0)
-                else:
-                    break
-        return not any(task["deadline"] < SIM_TIME for task in task_pool)
-
-    # 二分搜索最小 Q
-    low, high = 5.0, 130.0
-    best_q = None
-    while high - low > 0.1:
-        mid = round((low + high) / 2, 2)
-        if simulate(mid):
-            best_q = mid
-            high = mid
-        else:
-            low = mid
-
-    if best_q:
-        supply_map[comp_id] = {
-            "Q": round(best_q, 2),
-            "P": P_FIXED,
-            "core_id": core_id,
-            "scheduler": scheduler
+    if cid not in components:
+        info = a_supply[cid]
+        components[cid] = {
+            "core_id"   : info["core_id"],
+            "scheduler" : info["scheduler"].upper(),   # 内部
+            "Q"         : info["Q"],
+            "P"         : info["P"],
+            "budget"    : 0.0,
+            "priority"  : info.get("priority"),         # 顶层 RM 用
+            "tasks"     : []
         }
-
-# === 仿真部分 ===
-results = []
-for comp_id, group in tasks_df.groupby("component_id"):
-    if comp_id not in supply_map:
-        continue
-    supply = supply_map[comp_id]
-    Q = supply["Q"]
-    P = supply["P"]
-    core_id = supply["core_id"]
-    scheduler = supply["scheduler"]
-    speed = core_speed[core_id]
-
-    task_pool = []
-    supply_budget = 0.0
-    response_times = {name: [] for name in group["task_name"]}
-
-    for t in range(SIM_TIME):
-        if t % P == 0:
-            supply_budget += Q
-
-        for _, task in group.iterrows():
-            if t % task["period"] == 0:
-                task_pool.append({
-                    "name": task["task_name"],
-                    "remaining": float(task["wcet"]) / speed,
-                    "release": t,
-                    "deadline": t + task["period"],
-                    "priority": task["priority"]
-                })
-
-        while supply_budget >= 1.0 and task_pool:
-            if scheduler == "RM":
-                task_pool.sort(key=lambda x: x["priority"])
-            elif scheduler == "EDF":
-                task_pool.sort(key=lambda x: x["deadline"])
-            else:
-                task_pool.sort(key=lambda x: x["release"])
-
-            current = task_pool[0]
-            exec_amount = min(current["remaining"], 1.0)
-            current["remaining"] -= exec_amount
-            supply_budget -= exec_amount
-
-            if current["remaining"] <= 0.0001:
-                rt = t - current["release"] + 1
-                response_times[current["name"]].append(rt)
-                task_pool.pop(0)
-            else:
-                break
-
-    missed = any(task["deadline"] < SIM_TIME for task in task_pool)
-    max_rt = max([max(r) if r else 0 for r in response_times.values()])
-    avg_rt = round(sum([x for v in response_times.values() for x in v]) / max(1, sum(len(v) for v in response_times.values())), 2)
-
-    results.append({
-        "component_id": comp_id,
-        "core_id": core_id,
-        "scheduler": scheduler,
-        "schedulable": not missed,
-        "max_response_time": max_rt,
-        "avg_response_time": avg_rt
+    speed = a_core[components[cid]["core_id"]]["speed"]
+    components[cid]["tasks"].append({
+        "name"      : row.task_name,
+        "period"    : row.period,
+        "wcet"      : row.wcet / speed,   # 再保险
+        "priority"  : row.priority,
+        # Job runtime state
+        "release"   : None,
+        "deadline"  : None,
+        "remaining" : 0.0,
+        "miss_cnt"  : 0,
+        "rts"       : []
     })
 
-pd.DataFrame(results).to_csv(OUTPUT_PATH, index=False)
-print(f"✅ simulate_full_auto 完成，结果已保存：{OUTPUT_PATH}")
+# 将组件挂到核
+cores = {}
+for cid, comp in components.items():
+    core_id = comp["core_id"]
+    cores.setdefault(core_id, {"scheduler": a_core[core_id]["scheduler"], "components": {}})["components"][cid] = comp
+
+# --------------------------------------------------
+# 仿真循环
+# --------------------------------------------------
+print("\n--- 仿真开始 ---")
+for t in range(SIM_TIME):
+    # 1) 供给补充 & 任务释放
+    for comp in components.values():
+        if t % comp["P"] == 0:
+            comp["budget"] += comp["Q"]
+        for task in comp["tasks"]:
+            if t % task["period"] == 0:
+                task["release"]   = t
+                task["deadline"]  = t + task["period"]
+                task["remaining"] = task["wcet"]
+    # 2) 每核调度组件
+    for core in cores.values():
+        ready_comps = [c for c in core["components"].values() if c["budget"]>EPS and any(tsk["remaining"]>EPS for tsk in c["tasks"])]
+        if not ready_comps:
+            continue
+        if core["scheduler"] == "RM":
+            ready_comps.sort(key=lambda c: c["priority"] if (c.get("priority") is not None and not (isinstance(c.get("priority"), float) and math.isnan(c.get("priority")))) else 1e9)
+        else:  # EDF
+            ready_comps.sort(key=lambda c: min(tsk["deadline"] for tsk in c["tasks"] if tsk["remaining"]>EPS))
+        comp = ready_comps[0]
+
+        # 3) 组件内部选任务
+        runnable = [tsk for tsk in comp["tasks"] if tsk["remaining"]>EPS]
+        if comp["scheduler"] == "RM":
+            runnable.sort(key=lambda tsk: tsk["priority"] if pd.notna(tsk["priority"]) else 1e9)
+        else:  # EDF
+            runnable.sort(key=lambda tsk: tsk["deadline"])
+        task = runnable[0]
+
+        # 4) 执行
+        exec_amt = min(task["remaining"], QUANTUM, comp["budget"])
+        task["remaining"] -= exec_amt
+        comp["budget"]   -= exec_amt
+
+        # 5) 任务完成检查
+        if task["remaining"] <= EPS:
+            finish_time = t + exec_amt
+            rt = finish_time - task["release"]
+            task["rts"].append(rt)
+            if finish_time > task["deadline"] + EPS:
+                task["miss_cnt"] += 1
+
+# 6) 仿真结束后：若仍有剩余执行量视为 miss
+for comp in components.values():
+    for task in comp["tasks"]:
+        if task["remaining"] > EPS:
+            task["miss_cnt"] += 1
+print("--- 仿真结束 ---\n")
+
+# --------------------------------------------------
+# 结果汇总
+# --------------------------------------------------
+rows = []
+for cid, comp in components.items():
+    comp_schedulable = all(tsk["miss_cnt"]==0 for tsk in comp["tasks"])
+    for task in comp["tasks"]:
+        rows.append({
+            "task_name"           : task["name"],
+            "component_id"        : cid,
+            "task_schedulable"    : int(task["miss_cnt"]==0),
+            "avg_response_time"   : round(sum(task["rts"])/len(task["rts"],) ,2) if task["rts"] else 0.0,
+            "max_response_time"   : max(task["rts"], default=0.0),
+            "component_schedulable": int(comp_schedulable)
+        })
+
+os.makedirs(os.path.dirname(config.SOLUTION_PATH), exist_ok=True)
+pd.DataFrame(rows).to_csv(config.SOLUTION_PATH, index=False)
+print(f"✅ 结果已写入 {config.SOLUTION_PATH} (rows={len(rows)})")

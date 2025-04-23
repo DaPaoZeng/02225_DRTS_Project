@@ -1,64 +1,89 @@
 import pandas as pd
+import math, os
 import config
-from auto_tuner import auto_tune_supply
 
-# 自动生成 resource_supply.csv（来自分析结果自动调参）
-auto_tune_supply(
-    task_path=config.TASKS_PATH,
-    arch_path=config.ARCH_PATH,
-    sched_path=config.ANALYSIS_RESULT_PATH,
-    output_path=config.RESOURCE_SUPPLY_PATH
-)
+"""sim.py  —  Half‑Half 转换 (verbose)
+--------------------------------------------------
+读取 analyzer 的 α,Δ 结果 → 生成 resource_supply.csv (Q,P)
+注意：此文件只负责转换，不做仿真。
+"""
 
+# --------------------------------------------------
+# Helper: Half‑Half theorem
+# --------------------------------------------------
 
-
-# === 输入输出路径 ===
-input_path = config.ANALYSIS_RESULT_PATH
-output_path = config.RESOURCE_SUPPLY_PATH
-
-# === 加载分析器输出结果 ===
-analysis_df = pd.read_csv(input_path)
-
-# === Half-Half 转换函数（添加安全系数）===
-def convert_alpha_delta_to_qp(alpha, delta, fallback_P=130.0, safety_factor=1.15):
+def half_half_to_qp(alpha: float, delta: float):
+    """Given BDR (α,Δ) 返回供给任务 (Q,P)。
+    Theorem 3:  P = Δ / (1‑α)   Q = α·P   (隐式 P>0, α<1)。
+    若 Δ==0 视为固定带宽，返回 P=hyperperiod_like = 100, Q=α·P。
+    """
+    if alpha >= 1.0:
+        raise ValueError("alpha must be < 1 for Half‑Half")
     if delta == 0:
-        alpha = alpha * safety_factor  # 增加15%的资源
-        P = fallback_P
+        P = 100.0  # 可根据需要改为其他常数或最大 period
         Q = alpha * P
-    else:
-        P = delta / (2 * (1 - alpha))
-        Q = alpha * P
+        return round(Q, 2), round(P, 2)
+    P = delta / (1.0 - alpha)
+    Q = alpha * P
     return round(Q, 2), round(P, 2)
 
-# === 遍历每个 component 进行转换 ===
-converted_rows = []
+# --------------------------------------------------
+# Main
+# --------------------------------------------------
 
-for _, row in analysis_df.iterrows():
-    component_id = row["component_id"]
-    alpha = row["alpha"]
-    delta = row["delta"]
-    schedulable = row["schedulable"]
+def main():
+    analysis_path = config.ANALYSIS_RESULT_PATH
+    out_path = config.RESOURCE_SUPPLY_PATH
 
-    if schedulable and pd.notna(alpha) and pd.notna(delta):
-        try:
-            if component_id == "Camera_Sensor":
-                Q, P = 125.62, 130.0  # ✅ 强制使用调度成功的配置
-            else:
-                Q, P = convert_alpha_delta_to_qp(alpha, delta, fallback_P=130.0, safety_factor=1.15)
+    df = pd.read_csv(analysis_path)
+    print(f"=== Half‑Half 转换：读取 {analysis_path} 共 {len(df)} 行 ===")
 
-            converted_rows.append({
-                "component_id": component_id,
-                "core_id": row["core_id"],
-                "scheduler": row["scheduler"],
-                "Q": Q,
-                "P": P
-            })
-        except ZeroDivisionError:
-            print(f"❌ ZeroDivisionError: α={alpha}, ∆={delta} for {component_id}")
+    rows = []
+    for idx, row in df.iterrows():
+        comp_id = row["component_id"]
+        alpha = row["alpha"]
+        delta = row["delta"]
+        schedulable = bool(row["schedulable"])
+        scheduler = row["scheduler"].strip().upper()
+        core_id = row["core_id"]
+
+        if not schedulable or pd.isna(alpha) or pd.isna(delta):
+            print(f"[SKIP] {comp_id} 不可调度或缺少 αΔ")
             continue
+        if alpha >= 1.0:
+            print(f"[WARN] {comp_id} α≥1.0 (={alpha})，无法用 Half‑Half")
+            continue
+        try:
+            Q, P = half_half_to_qp(alpha, delta)
+            rows.append({
+                "component_id": comp_id,
+                "core_id": core_id,
+                "scheduler": scheduler,
+                "Q": Q,
+                "P": P,
+            })
+            print(f"[OK] {comp_id:<15} α={alpha:<4} Δ={delta:<3} ⇒ Q={Q:<6} P={P:<6}")
+        except ValueError as e:
+            print(f"[ERR] {comp_id}: {e}")
 
-# === 保存为 resource_supply.csv ===
-converted_df = pd.DataFrame(converted_rows)
-converted_df.to_csv(output_path, index=False)
+    if not rows:
+        print("✗ 未生成任何供给任务！")
+        return
 
-print(f"\n✅ resource_supply.csv 生成成功，已保存到：{output_path}")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    pd.DataFrame(rows).to_csv(out_path, index=False)
+    print(f"\n✅ resource_supply.csv 写入 {out_path} (rows={len(rows)})")
+
+if __name__ == "__main__":
+    main()
+
+"""
+# | 变动 | 原因
+1 | 正确 Half-Half 公式 P = Δ / (1-α), Q = α·P | 纠正旧版 P = Δ / (2·(1-α)) + safety factor 的错误
+2 | 当 Δ == 0 视为固定带宽：P = 100, Q = α·P | 保证 α>0 情况仍能生成供给任务
+3 | 去掉 Camera_Sensor 硬编码特判 & safety_factor | 保持通用性
+4 | 详细日志  • 读入/行数  • 每组件 α,Δ→Q,P  • 跳过/警告/错误打印 | 运行时可一目了然转换流程
+5 | 生成目录不存在时自动创建 | 兼容 CI/新机器
+6 | 输入字段统一 upper() | 防止大小写混用影响后续
+
+"""

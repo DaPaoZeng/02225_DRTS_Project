@@ -1,85 +1,121 @@
 import pandas as pd
-import math
+import math, os
 import config
 
-# === 读取预处理任务文件 ===
-df = pd.read_csv(config.PREPROCESSED_TASKS_PATH)
+"""analyzer.py — 组件级 α,Δ 搜索 (Verbose, RM‑DBF 修正版)
+--------------------------------------------------
+1. **EDF** 采用 Eq.(2)/(3) 计算 `dbf_edf`。
+2. **RM/FPS** 采用 Eq.(4) — 先按优先级排序，再对每个任务求 `dbf_i(t)`，取最大。
+3. 搜索 Δ∈[0,200]，对每 Δ 求最小 α = max_t (dbf/(t‑Δ))。
+4. 打印组件明细、首次可行 Δ、最终 α,Δ。
+"""
 
-# === 定义 DBF（RM 版本） ===
-def dbf_rm(taskset, t, task_index):
-    task_i = taskset[task_index]
-    dbf = task_i["wcet"]
-    for j in range(task_index):
-        hp_task = taskset[j]
-        dbf += math.ceil(t / hp_task["period"]) * hp_task["wcet"]
-    return dbf
+# --------------------------------------------------
+# 参数
+# --------------------------------------------------
+DELTA_MAX = 200
+ALPHA_GRAN = 0.01
+TEST_HORIZON_FACTOR = 5
 
-# === 定义 DBF（EDF 版本） ===
-def dbf_edf(taskset, t):
-    return sum((t // task["period"]) * task["wcet"] for task in taskset)
+# --------------------------------------------------
+# 通用 DBF 帮助函数
+# --------------------------------------------------
 
-# === 定义 SBF 函数 ===
-def sbf(alpha, delta, t):
-    return 0 if t < delta else alpha * (t - delta)
+def n_jobs_implicit_deadline(t: int, T: float) -> int:
+    """返回在区间 [0,t) 内任务产生的 job 数 (implicit deadline)。"""
+    if t < T:
+        return 0
+    return math.floor((t - T) / T) + 1
 
-# === 分析器核心函数 ===
-def analyze_schedulability(tasks, scheduler, max_t):
-    for delta in range(0, 101):
-        for a in range(1, 201):  # α from 0.01 to 2.00
-            alpha = a / 100
-            ok = True
 
-            for t in range(1, max_t + 1):
-                if scheduler == "RM":
-                    for i in range(len(tasks)):
-                        dbf = dbf_rm(tasks, t, i)
-                        if dbf > sbf(alpha, delta, t):
-                            ok = False
-                            break
-                elif scheduler == "EDF":
-                    dbf = dbf_edf(tasks, t)
-                    if dbf > sbf(alpha, delta, t):
-                        ok = False
+def dbf_edf(tasks, t):
+    return sum(n_jobs_implicit_deadline(t, T) * C for C, T in tasks)
 
-                if not ok:
-                    break
-            if ok:
-                return True, round(alpha, 2), delta
+
+def dbf_rm(tasks_sorted_by_priority, t):
+    """tasks 已按 RM 优先级从高到低排序。返回 max_i dbf_i(t)。"""
+    worst = 0.0
+    for idx in range(len(tasks_sorted_by_priority)):
+        demand = 0.0
+        for j in range(idx + 1):  # high‑or‑equal priority (自任务含在内)
+            C_j, T_j = tasks_sorted_by_priority[j]
+            demand += n_jobs_implicit_deadline(t, T_j) * C_j
+        worst = max(worst, demand)
+    return worst
+
+# --------------------------------------------------
+# 逐组件分析
+# --------------------------------------------------
+
+def analyze_component(df_comp: pd.DataFrame):
+    comp_id = df_comp["component_id"].iloc[0]
+    scheduler = df_comp["scheduler"].iloc[0].strip().upper()
+
+    # RM 任务需按优先级排序（priority 列数值越小优先级越高）
+    if scheduler == "RM":
+        df_comp = df_comp.sort_values("priority")
+    tasks = list(zip(df_comp["wcet"], df_comp["period"]))
+
+    max_period = df_comp["period"].max()
+    max_t = max_period * TEST_HORIZON_FACTOR
+    test_points = range(1, int(max_t) + 1)
+
+    print(f"\n[COMP] {comp_id}  sched={scheduler}  tasks={len(tasks)}  max_t={max_t}")
+    for idx, (C, T) in enumerate(tasks, 1):
+        print(f"       └─ Task{idx}: C={C}, T={T}")
+
+    best = None  # (Δ,α)
+    for delta in range(DELTA_MAX + 1):
+        worst_ratio = 0.0
+        feasible = True
+        for t in test_points:
+            if t <= delta:
+                continue
+            if scheduler == "EDF":
+                demand = dbf_edf(tasks, t)
+            else:  # RM
+                demand = dbf_rm(tasks, t)
+            ratio = demand / (t - delta)
+            if ratio > 1.0:
+                feasible = False
+                break
+            worst_ratio = max(worst_ratio, ratio)
+        if feasible:
+            alpha = round(math.ceil(worst_ratio / ALPHA_GRAN) * ALPHA_GRAN, 2)
+            if alpha > 1.0:
+                continue
+            print(f"       ✓ first feasible at Δ={delta}, α={alpha}")
+            if best is None or delta < best[0] or (delta == best[0] and alpha < best[1]):
+                best = (delta, alpha)
+    if best:
+        print(f"       → chosen Δ={best[0]}, α={best[1]}")
+        return True, best[1], best[0]
+    print("       ✗ UNSCHEDULABLE within search bounds")
     return False, None, None
 
-# === 分析每个组件 ===
-grouped = df.groupby("component_id")
-results = []
+# --------------------------------------------------
+# 主程
+# --------------------------------------------------
 
-for comp_id, group in grouped:
-    print(f"\n分析组件：{comp_id}")
-    original_scheduler = group["scheduler"].iloc[0].strip().upper()
-    core_id = group["core_id"].iloc[0]
+def main():
+    df = pd.read_csv(config.PREPROCESSED_TASKS_PATH)
+    print(f"=== Analyzer 启动：读取 {len(df)} task‑rows ===")
 
-    tasks = group.sort_values("priority").to_dict("records")
-    max_t = max([task["period"] for task in tasks]) * 5
+    results = []
+    for comp_id, group in df.groupby("component_id"):
+        ok, alpha, delta = analyze_component(group)
+        results.append({
+            "component_id": comp_id,
+            "core_id": group["core_id"].iloc[0],
+            "scheduler": group["scheduler"].iloc[0].strip().upper(),
+            "alpha": alpha,
+            "delta": delta,
+            "schedulable": ok,
+        })
 
-    # 默认用原始 scheduler 分析
-    feasible, best_alpha, best_delta = analyze_schedulability(tasks, original_scheduler, max_t)
-    final_scheduler = original_scheduler
+    os.makedirs(os.path.dirname(config.ANALYSIS_RESULT_PATH), exist_ok=True)
+    pd.DataFrame(results).to_csv(config.ANALYSIS_RESULT_PATH, index=False)
+    print(f"\n✅ 分析完成，结果写入 {config.ANALYSIS_RESULT_PATH}\n")
 
-    # 如果 RM 不可调度，自动尝试 EDF
-    if not feasible and original_scheduler == "RM":
-        # print(f"⚠️  {comp_id} 在 RM 下不可调度，尝试使用 EDF...")
-        feasible, best_alpha, best_delta = analyze_schedulability(tasks, "EDF", max_t)
-        if feasible:
-            final_scheduler = "EDF (fallback)"
-
-    results.append({
-        "component_id": comp_id,
-        "core_id": core_id,
-        "scheduler": final_scheduler,
-        "alpha": best_alpha,
-        "delta": best_delta,
-        "schedulable": feasible
-    })
-
-# === 输出分析结果 ===
-output_df = pd.DataFrame(results)
-output_df.to_csv(config.ANALYSIS_RESULT_PATH, index=False)  # 使用配置文件中的路径
-print("\n✅ 分析完成，结果保存在 analysis_result.csv")
+if __name__ == "__main__":
+    main()
