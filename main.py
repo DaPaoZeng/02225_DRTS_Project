@@ -10,8 +10,16 @@ CONFIG_FILE = SRC / "config.py"
 CASES_ROOT = ROOT / "DRTS_Project-Test-Cases"
 OUTPUT_ROOT = ROOT / "output"
 
+# === 初始化 result_check_solution.txt 文件 ===
+RESULT_FILE = OUTPUT_ROOT / "result_check_solution.txt"
+if not RESULT_FILE.exists():
+    RESULT_FILE.write_text("📄 check_solution.py 运行记录\n", encoding="utf-8")
+
 # 获取子文件夹列表
-case_folders = sorted([f for f in CASES_ROOT.iterdir() if f.is_dir()])[:10]
+def natural_key(f):
+    # 提取文件名中的数字部分用于排序（如 "10-case" -> [10]）
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', f.name)]
+case_folders = sorted([f for f in CASES_ROOT.iterdir() if f.is_dir()], key=natural_key)[:10]
 if not case_folders:
     print("!!! 没有找到任何测试子文件夹！请确认 DRTS_Project-Test-Cases/ 下有内容")
     sys.exit(1)
@@ -62,7 +70,7 @@ def run_all_scripts():
     # 运行 check_solution.py（假设在项目根目录）
     check_script = SRC / "check_solution.py"
     print(f"\n▶ 运行：check_solution.py")
-    result = subprocess.run([sys.executable, str(check_script)])
+    result = subprocess.run([sys.executable, str(check_script), folder.name], check=True)
     if result.returncode != 0:
         print("❌ check_solution.py 出错")
         return False
