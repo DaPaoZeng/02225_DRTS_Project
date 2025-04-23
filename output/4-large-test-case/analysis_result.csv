@@ -1,0 +1,8 @@
+component_id,core_id,scheduler,alpha,delta,schedulable
+Bitmap_Processor,Core_1,EDF (fallback),0.07,0,True
+Camera_Sensor,Core_1,EDF (fallback),0.1,0,True
+Communication_Unit,Core_3,EDF (fallback),0.3,0,True
+Control_Unit,Core_2,EDF,0.44,0,True
+GPS_Sensor,Core_3,EDF (fallback),0.11,0,True
+Image_Processor,Core_1,EDF,0.1,0,True
+Lidar_Sensor,Core_2,EDF (fallback),0.23,0,True

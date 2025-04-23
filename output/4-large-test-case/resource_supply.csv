@@ -1,0 +1,8 @@
+component_id,core_id,scheduler,Q,P
+Bitmap_Processor,Core_1,EDF (fallback),10.46,130.0
+Camera_Sensor,Core_1,EDF (fallback),125.62,130.0
+Communication_Unit,Core_3,EDF (fallback),44.85,130.0
+Control_Unit,Core_2,EDF,65.78,130.0
+GPS_Sensor,Core_3,EDF (fallback),16.45,130.0
+Image_Processor,Core_1,EDF,14.95,130.0
+Lidar_Sensor,Core_2,EDF (fallback),34.39,130.0

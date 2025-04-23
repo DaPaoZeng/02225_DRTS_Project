@@ -1,0 +1,8 @@
+component_id,core_id,scheduler,schedulable,max_response_time,avg_response_time
+Bitmap_Processor,Core_1,EDF,True,832,108.29
+Camera_Sensor,Core_1,EDF,True,616,113.5
+Communication_Unit,Core_3,EDF,True,369,76.55
+Control_Unit,Core_2,EDF,True,842,106.06
+GPS_Sensor,Core_3,EDF,True,315,69.49
+Image_Processor,Core_1,EDF,True,232,65.61
+Lidar_Sensor,Core_2,EDF,True,560,129.8

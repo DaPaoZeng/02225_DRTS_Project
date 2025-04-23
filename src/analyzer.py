@@ -65,7 +65,7 @@ for comp_id, group in grouped:
 
     # 如果 RM 不可调度，自动尝试 EDF
     if not feasible and original_scheduler == "RM":
-        print(f"⚠️  {comp_id} 在 RM 下不可调度，尝试使用 EDF...")
+        # print(f"⚠️  {comp_id} 在 RM 下不可调度，尝试使用 EDF...")
         feasible, best_alpha, best_delta = analyze_schedulability(tasks, "EDF", max_t)
         if feasible:
             final_scheduler = "EDF (fallback)"
