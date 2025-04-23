@@ -1,8 +1,8 @@
 component_id,core_id,scheduler,Q,P
-Bitmap_Processor,Core_1,RM,13.0,100.0
+Bitmap_Processor,Core_1,RM,14.0,100.0
 Camera_Sensor,Core_1,RM,18.0,100.0
 Communication_Unit,Core_3,RM,41.0,100.0
 Control_Unit,Core_2,EDF,63.0,100.0
-GPS_Sensor,Core_3,RM,15.0,100.0
+GPS_Sensor,Core_3,RM,18.0,100.0
 Image_Processor,Core_1,EDF,19.0,100.0
-Lidar_Sensor,Core_2,RM,32.0,100.0
+Lidar_Sensor,Core_2,RM,35.0,100.0

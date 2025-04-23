@@ -1,2 +1,2 @@
 component_id,core_id,scheduler,Q,P
-Camera_Sensor,Core_1,EDF (fallback),125.62,130.0
+Camera_Sensor,Core_1,RM,99.0,100.0

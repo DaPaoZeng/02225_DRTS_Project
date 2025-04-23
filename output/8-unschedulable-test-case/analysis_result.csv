@@ -1,8 +1,8 @@
 component_id,core_id,scheduler,alpha,delta,schedulable
-Bitmap_Processor,Core_1,RM,0.13,0,True
+Bitmap_Processor,Core_1,RM,0.14,0,True
 Camera_Sensor,Core_1,RM,0.18,0,True
 Communication_Unit,Core_3,RM,0.41,0,True
 Control_Unit,Core_2,EDF,0.63,0,True
-GPS_Sensor,Core_3,RM,0.15,0,True
+GPS_Sensor,Core_3,RM,0.18,0,True
 Image_Processor,Core_1,EDF,0.19,0,True
-Lidar_Sensor,Core_2,RM,0.32,0,True
+Lidar_Sensor,Core_2,RM,0.35,0,True

@@ -1,0 +1,6 @@
+component_id,core_id,scheduler,Q,P
+Camera_Sensor,Core_1,RM,29.0,100.0
+Communication_Unit,Core_3,RM,35.0,100.0
+GPS_Sensor,Core_3,RM,17.0,100.0
+Image_Processor,Core_1,EDF,44.0,100.0
+Proximity_Sensor,Core_4,EDF,29.0,100.0

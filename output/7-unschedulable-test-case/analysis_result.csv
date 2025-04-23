@@ -1,0 +1,7 @@
+component_id,core_id,scheduler,alpha,delta,schedulable
+Camera_Sensor,Core_1,RM,0.29,0.0,True
+Communication_Unit,Core_3,RM,0.35,0.0,True
+GPS_Sensor,Core_3,RM,0.17,0.0,True
+Image_Processor,Core_1,EDF,0.44,0.0,True
+Lidar_Sensor,Core_2,RM,,,False
+Proximity_Sensor,Core_4,EDF,0.29,0.0,True

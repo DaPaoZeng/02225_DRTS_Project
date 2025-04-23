@@ -1,22 +1,26 @@
 # 02225-DRTS
 
 
-## 1. 项目概述
+## 1  项目概述
+本仓库实现了一个 **分层实时系统任务调度仿真器**，可在多核平台上比较 **RM (Rate Monotonic)** 与 **EDF (Earliest Deadline First)** 等策略的效果。  
+工具链涵盖 **分析-调参-仿真-自动验收** 四个阶段，并输出最坏响应时间 (WCRT)、服务器参数 (Q,P)、以及逐 job 的完成/超时信息。
 
-本项目是一个基于 **实时系统** 的任务调度仿真器，旨在模拟和分析不同调度策略（如 **RM (Rate Monotonic)** 和 **EDF (Earliest Deadline First)**）下的任务调度效果。项目通过分析任务集和调度算法，计算每个任务的 **最坏响应时间**（WCRT）并进行调度验证。最终生成调度方案、任务响应时间等仿真结果。
 
-## 2. 项目要求与完成情况对照
 
-| **项目要求**                                                                 | **完成情况**                                                                                                         |
-|----------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
-| **工具开发**：开发一个软件工具计算周期性和偶发性任务的 **最坏响应时间**（WCRT）。                 | 通过 `analyzer.py` 计算任务的最坏响应时间，并验证任务的可调度性。                                           |
-| **调度性分析验证**：将分析结果与其他方法（如手动计算、仿真等）进行对比，识别并解释差异。       | 通过二分法搜索最小的 **Q** 值来进行调度验证，模拟任务是否能够在给定的约束下完成。 |
-| **详细的结果分析**：记录仿真和分析的结果，明确解释每个结果的意义，特别是在 ADAS 任务调度中的应用。 | 分析了不同调度策略（RM 和 EDF）下的任务调度，生成了响应时间、可调度性等结果并输出为 `solution.csv` 文件。 |
-| **比较性能评估**：评估不同调度技术的效果，分析它们对 **WCRT**、错过的截止时间等性能指标的影响。   | 使用二分法自动调整 **Q** 和 **P**，并比较不同调度策略的性能影响。                                          |
-| **测试用例**：开发多个真实的系统场景，包括不同的流量、负载、配置参数。                           | 使用多个测试数据集（如 `10-unschedulable-test-case`）进行模拟。                                             |
-| **批判性评估**：讨论选择的调度方法的优缺点，提出改进方案或进一步研究的方向。                    | 在 `README.md` 和代码注释中提供了对调度方法的批判性分析。                                                   |
-| **团队协作**：展示团队任务分工并整合个人贡献。                                           | 所有文件和功能模块都有明确的职责划分，项目结构清晰。                                                         |
-| **报告编写**：报告内容清晰，使用简洁的技术语言，正确引用所有参考文献。                               | 项目的所有细节都有详细的描述，所有功能的实现都在报告中有所体现。                                              |
+## 2  项目要求与完成情况
+
+| 项目要求 | 已实现 |
+|----------|--------|
+| **工具开发**：计算周期/偶发任务的 WCRT | `analyzer.py` 解析 DBF/SBF，标出组件可调度区间 |
+| **调度性验证**：与仿真比对 | `check_solution.py` 自动判断是否仍有 deadline-miss |
+| **结果分析**：解释 ADAS 场景意义 | README & 代码注释阐述 α/Δ 与 (Q,P) 的物理含义 |
+| **性能评估**：对比 RM vs EDF | 切换 `task_sched` 字段即可，统计 miss / lateness |
+| **多用例**：不同负载、配置 | 1-10 官方 case 全覆盖，含 4 个不可调场景 |
+| **批判性评估** | README 第 6 章列出局限与改进 |
+| **团队协作 & 报告** | 文件头 `__author__` 标注职责，另附 `report.pdf` |
+
+---
+
 
 ## 3. 目录结构
 ```bash
@@ -42,27 +46,37 @@
 │   └── solution.csv             # 记录最终解决方案数据
 └── src/
     ├── analyzer.py
-    ├── auto_tuner.py
+    ├── solution_check.py
     ├── config.py
     ├── Drts.py
     ├── sim.py
     └── simulate_full_auto.py
 ```
 
-### 各目录/文件说明：
-- **`/src`**：存放项目的主要代码文件。
-  - **`Drts.py`**：负责任务和组件的初始化，加载任务数据并生成预处理任务文件。
-  - **`analyzer.py`**：计算任务的最坏响应时间（WCRT），分析任务的调度可调度性。
-  - **`sim.py`**：进行自动调优，生成调优后的资源供应文件。
-  - **`simulate_full_auto.py`**：进行任务调度仿真，输出调度结果。
-  
-- **`/config`**：存放配置文件，集中管理路径配置。
-  - **`config.py`**：管理任务数据集路径、输出路径等配置。
-  
-- **`/output`**：存放所有生成的输出文件。
-  - **`analysis_result.csv`**：记录任务调度的分析结果。
-  - **`resource_supply.csv`**：记录调优后的资源供应数据。
-  - **`solution.csv`**：仿真结果，包含响应时间等性能指标。
+### 各目录 / 文件说明
+
+- **`/src`**：项目主代码  
+  | 文件 | 作用 |
+  |------|------|
+  | **`Drts.py`** | 读取 *tasks / architecture / budgets*，完成任务与组件初始化并导出 `preprocessed_tasks.csv` |
+  | **`analyzer.py`** | 计算 WCRT，搜索组件级接口参数 (α, Δ)，输出 `analysis_result.csv` |
+  | **`sim.py`** | 依据 Half-Half 定理把 (α, Δ) → 服务器参数 (Q,P)，生成 `resource_supply.csv` |
+  | **`simulate_full_auto.py`** | 结合任务、服务器供给、核心分配进行完整离线仿真，生成 `solution.csv` |
+  | **`check_solution.py`** | 快速校验 `solution.csv` 是否存在 deadline miss，并给出统计摘要 |
+  | **`config.py`** | 统一配置（数据集路径、输出目录等），一处修改全流程生效 |
+
+- **`/config`**：同上，当前仅含 `config.py`（已在表中列出）。
+
+- **`/output`**：按测试用例自动分子目录保存所有结果  
+  | 文件 | 说明 |
+  |------|------|
+  | `preprocessed_tasks.csv` | Drts 预处理后的展平任务列表 |
+  | `analysis_result.csv` | 组件级分析结果：α、Δ、可调度标志等 |
+  | `resource_supply.csv` | Half-Half 转换后的服务器供给表 (Q,P) |
+  | `solution.csv` | 仿真 Job-trace：avg/max 响应时间、miss 标志等 |
+
+> 若后续新增或删减脚本，只需在此表补充 / 删除对应行即可。
+
 
 ## 4. 代码使用说明
 
@@ -90,19 +104,44 @@
    PREPROCESSED_TASKS_PATH = os.path.join(OUTPUT_DIR, "preprocessed_tasks.csv")
 
 
-1. **运行顺序**：
+### 运行顺序（4 步即可）
 
-- Drts.py：加载任务数据，生成 `preprocessed_tasks.csv` 。
-- analyzer.py：读取 `preprocessed_tasks.csv` ，分析任务调度的可调度性，生成 ` analysis_result.csv` 。
-- sim.py：根据分析结果进行调参，生成 `resource_supply.csv` 。
-- simulate_full_auto.py：执行调度仿真，输出 `solution.csv` 。
+1. **`Drts.py`**  
+   读取 *tasks / architecture / budgets* → 生成 **`preprocessed_tasks.csv`**
 
+2. **`analyzer.py`**  
+   读取 `preprocessed_tasks.csv` → 计算每个组件的 (α, Δ) 与可调度性 → 输出 **`analysis_result.csv`**
+
+3. **`sim.py`**  
+   把 (α, Δ) 按 *Half-Half* 定理转换为服务器参数 (Q,P) → 输出 **`resource_supply.csv`**
+
+4. **`simulate_full_auto.py`**  
+   综合任务、服务器供给和核心映射执行离线仿真 → 生成 **`solution.csv`**
+
+> 可选：运行 **`check_solution.py`** 对 `solution.csv` 做一键验证，快速查看有无 deadline-miss。
+
+---
 
 ## 5. 运行示例
 
-假设你已经设置好路径并完成所有文件配置，运行代码的过程如下：
+（假设已在 `config.py` 中正确配置数据集及输出目录）
 
-- 运行 Drts.py，它会生成 `preprocessed_tasks.csv` 。
-- 运行 analyzer.py，它会使用 `preprocessed_tasks.csv`  并生成 `analysis_result.csv` 。
-- 运行 sim.py，它会基于 `analysis_result.csv` 进行调优并生成 `resource_supply.csv` 。
-- 最后，运行 `simulate_full_auto.py` ，它将仿真调度并生成最终的仿真结果 `solution.csv`。
+```bash
+# Step-1 预处理
+python src/Drts.py
+#  → output/.../preprocessed_tasks.csv
+
+# Step-2 组件级分析
+python src/analyzer.py
+#  → output/.../analysis_result.csv
+
+# Step-3 Half-Half 转换
+python src/sim.py
+#  → output/.../resource_supply.csv
+
+# Step-4 完整仿真
+python src/simulate_full_auto.py
+#  → output/.../solution.csv
+
+# (可选) Step-5 快速检查
+python src/check_solution.py

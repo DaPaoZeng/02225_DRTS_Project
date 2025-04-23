@@ -1,6 +1,6 @@
 component_id,core_id,scheduler,Q,P
 Acceleration_Sensor,Core_10,RM,29.0,100.0
-Altimeter_Sensor,Core_12,EDF,13.0,100.0
+Altimeter_Sensor,Core_12,EDF,11.0,100.0
 Anemometer_Sensor,Core_14,RM,47.0,100.0
 Barometer_Sensor,Core_13,EDF,47.0,100.0
 Bitmap_Processor,Core_1,RM,18.0,100.0
@@ -8,14 +8,14 @@ Camera_Sensor,Core_1,RM,27.0,100.0
 Communication_Unit,Core_3,RM,9.0,100.0
 Compass_Sensor,Core_12,RM,16.0,100.0
 Control_Unit,Core_2,EDF,20.0,100.0
-GPS_Sensor,Core_3,RM,9.0,100.0
+GPS_Sensor,Core_3,RM,8.0,100.0
 Gyroscope_Sensor,Core_11,EDF,20.0,100.0
 Humidity_Sensor,Core_7,RM,40.0,100.0
 Hygrometer_Sensor,Core_13,RM,20.0,100.0
 Image_Processor,Core_1,EDF,9.0,100.0
 Infrared_Sensor,Core_5,RM,30.0,100.0
 Laser_Sensor,Core_5,RM,36.0,100.0
-Lidar_Sensor,Core_2,RM,29.0,100.0
+Lidar_Sensor,Core_2,RM,23.0,100.0
 Light_Sensor,Core_8,RM,20.0,100.0
 Magnetometer_Sensor,Core_11,RM,10.0,100.0
 Motion_Sensor,Core_10,RM,20.0,100.0
@@ -26,8 +26,8 @@ Pyrometer_Sensor,Core_16,RM,8.0,100.0
 Radar_Sensor,Core_4,EDF,44.0,100.0
 Rain_Gauge_Sensor,Core_14,RM,28.0,100.0
 Snow_Gauge_Sensor,Core_15,EDF,21.0,100.0
-Sonar_Sensor,Core_4,RM,19.0,100.0
-Sound_Sensor,Core_9,RM,29.0,100.0
+Sonar_Sensor,Core_4,RM,18.0,100.0
+Sound_Sensor,Core_9,RM,31.0,100.0
 Temperature_Sensor,Core_8,EDF,59.0,100.0
 Thermal_Sensor,Core_6,EDF,50.0,100.0
 Thermometer_Sensor,Core_15,EDF,30.0,100.0

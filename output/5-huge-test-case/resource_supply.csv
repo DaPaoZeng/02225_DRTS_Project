@@ -2,7 +2,7 @@ component_id,core_id,scheduler,Q,P
 Bitmap_Processor,Core_1,RM,20.0,100.0
 Camera_Sensor,Core_1,RM,27.0,100.0
 Communication_Unit,Core_3,RM,9.0,100.0
-Control_Unit,Core_2,EDF,19.0,100.0
+Control_Unit,Core_2,EDF,18.0,100.0
 GPS_Sensor,Core_3,RM,9.0,100.0
 Humidity_Sensor,Core_7,RM,50.0,100.0
 Image_Processor,Core_1,EDF,10.0,100.0
@@ -14,6 +14,6 @@ Pressure_Sensor,Core_7,RM,8.0,100.0
 Proximity_Sensor,Core_3,EDF,10.0,100.0
 Radar_Sensor,Core_4,EDF,49.0,100.0
 Sonar_Sensor,Core_4,RM,19.0,100.0
-Temperature_Sensor,Core_8,EDF,62.0,100.0
+Temperature_Sensor,Core_8,EDF,59.0,100.0
 Thermal_Sensor,Core_6,EDF,37.0,100.0
 Ultraviolet_Sensor,Core_6,EDF,20.0,100.0
