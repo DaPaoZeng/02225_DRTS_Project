@@ -124,7 +124,7 @@
 ## 5. 运行示例
 方法1：
 ```bash
-python run_batch.py
+python main.py
 ```
 
 方法2：
