@@ -31,6 +31,7 @@ with open(output_path, "a", encoding="utf-8") as f:
 
     n_task     = len(df)
     n_task_bad = (df[task_ok_col] == 0).sum()
+    task_success_rate = round(100.0 * (1 - n_task_bad / n_task), 2) #输出调度成功率（任务维度）
 
     if comp_ok_col:
         comp = (df.groupby("component_id")[comp_ok_col].first() == 0)
@@ -39,13 +40,22 @@ with open(output_path, "a", encoding="utf-8") as f:
         n_comp_bad = '—'
 
     f.write(f"任务总数          : {n_task}\n")
-    f.write(f"❌ deadline-miss 任务数 : {n_task_bad}\n")
-    f.write(f"❌ 不可调组件数       : {n_comp_bad}\n")
+    f.write(f"deadline-miss 任务数 : {n_task_bad}\n")
+    f.write(f"不可调组件数       : {n_comp_bad}\n")
+    f.write(f"任务调度成功率    : {task_success_rate:.2f}%\n")
 
     if n_task_bad:
         f.write("\n前几个 miss 的任务：\n")
         f.write(df.loc[df[task_ok_col]==0, ["task_name", "component_id"]]
                   .head().to_string(index=False) + "\n")
+    f.write("\n各组件任务调度成功率：\n") #输出每个组件的调度成功率（组件内任务平均），可以判断是哪个组件出了问题，尤其是多个任务的组件
+    component_rates = df.groupby("component_id")[task_ok_col].mean()
+    for cid, rate in component_rates.items():
+        f.write(f"  - {cid:<20} : {rate:.2%}\n")
+
 
     f.write("✓ 全部可调度 🎉\n" if n_task_bad == 0 else "✘ 有任务 miss\n")
-    f.write("─"*60 + "\n")
+
+
+# 向 stdout 打印当前 case 的 Markdown 汇总行（供 main.py 捕获）
+print(f"[SUMMARY] | {case_name} | {n_task} | {n_task_bad} | {100.0 * (1 - n_task_bad / n_task):.2f}% | {n_comp_bad} |")

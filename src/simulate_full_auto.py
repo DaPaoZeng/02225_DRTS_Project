@@ -126,7 +126,7 @@ for cid, comp in components.items():
             "task_name"           : task["name"],
             "component_id"        : cid,
             "task_schedulable"    : int(task["miss_cnt"]==0),
-            "avg_response_time"   : round(sum(task["rts"])/len(task["rts"],) ,2) if task["rts"] else 0.0,
+            "avg_response_time"   : round(sum(task["rts"])/len(task["rts"]), 2) if task["rts"] else 0.0,
             "max_response_time"   : max(task["rts"], default=0.0),
             "component_schedulable": int(comp_schedulable)
         })

@@ -1,6 +1,7 @@
 import pandas as pd
 import math, os
 import config
+import matplotlib.pyplot as plt
 
 """analyzer.py — 组件级 α,Δ 搜索 (Verbose, RM‑DBF 修正版)
 --------------------------------------------------
@@ -9,6 +10,10 @@ import config
 3. 搜索 Δ∈[0,200]，对每 Δ 求最小 α = max_t (dbf/(t‑Δ))。
 4. 打印组件明细、首次可行 Δ、最终 α,Δ。
 """
+# --------------------------------------------------
+# 图像输出目录
+# --------------------------------------------------
+PLOT_OUTPUT_DIR = os.path.join(config.OUTPUT_DIR, "plots") #为每个组件生成 dbf vs sbf 折线图
 
 # --------------------------------------------------
 # 参数
@@ -81,7 +86,8 @@ def analyze_component(df_comp: pd.DataFrame):
                 break
             worst_ratio = max(worst_ratio, ratio)
         if feasible:
-            alpha = round(math.ceil(worst_ratio / ALPHA_GRAN) * ALPHA_GRAN, 2)
+            # alpha = round(math.ceil(worst_ratio / ALPHA_GRAN) * ALPHA_GRAN, 2)
+            alpha = round((math.ceil(worst_ratio / ALPHA_GRAN) * ALPHA_GRAN) + 1e-9, 2)
             if alpha > 1.0:
                 continue
             print(f"       ✓ first feasible at Δ={delta}, α={alpha}")
@@ -92,6 +98,37 @@ def analyze_component(df_comp: pd.DataFrame):
         return True, best[1], best[0]
     print("       ✗ UNSCHEDULABLE within search bounds")
     return False, None, None
+
+
+# --------------------------------------------------
+# dbf vs sbf 折线图
+# --------------------------------------------------
+def plot_dbf_vs_sbf(comp_id, scheduler, tasks, alpha, delta, max_t):
+    ts = list(range(1, int(max_t) + 1))
+    dbfs, sbfs = [], []
+
+    for t in ts:
+        if scheduler == "EDF":
+            dbf = dbf_edf(tasks, t)
+        else:
+            dbf = dbf_rm(tasks, t)
+        dbfs.append(dbf)
+        sbfs.append(max(0, alpha * (t - delta)) if t > delta else 0)
+
+    plt.figure()
+    plt.plot(ts, dbfs, label="DBF", linewidth=2)
+    plt.plot(ts, sbfs, label="SBF", linestyle="--", linewidth=2)
+    plt.xlabel("Time (t)")
+    plt.ylabel("Resource Demand / Supply")
+    plt.title(f"{comp_id} ({scheduler})")
+    plt.legend()
+    plt.grid(True)
+
+    os.makedirs(PLOT_OUTPUT_DIR, exist_ok=True)
+    out_path = os.path.join(PLOT_OUTPUT_DIR, f"{comp_id}_dbf_vs_sbf.png")
+    plt.savefig(out_path)
+    plt.close()
+    print(f"       📊 Plot saved to {out_path}")
 
 # --------------------------------------------------
 # 主程
@@ -104,6 +141,12 @@ def main():
     results = []
     for comp_id, group in df.groupby("component_id"):
         ok, alpha, delta = analyze_component(group)
+        if ok:
+            scheduler = group["scheduler"].iloc[0].strip().upper()
+            tasks = list(zip(group["wcet"], group["period"]))
+            max_period = group["period"].max()
+            max_t = max_period * TEST_HORIZON_FACTOR
+            plot_dbf_vs_sbf(comp_id, scheduler, tasks, alpha, delta, max_t)
         results.append({
             "component_id": comp_id,
             "core_id": group["core_id"].iloc[0],

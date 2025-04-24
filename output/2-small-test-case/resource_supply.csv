@@ -1,3 +1,3 @@
-component_id,core_id,scheduler,Q,P
-Camera_Sensor,Core_1,RM,46.0,100.0
-Image_Processor,Core_1,EDF,28.0,100.0
+component_id,core_id,scheduler,Q,P,load
+Camera_Sensor,Core_1,RM,46.0,100.0,0.452
+Image_Processor,Core_1,EDF,28.0,100.0,0.276

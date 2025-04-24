@@ -48,7 +48,7 @@ def update_config(base_path: Path, output_dir: Path):
     CONFIG_FILE.write_text(text, encoding="utf-8")
     print(f"🛠️ 修改 config.py：BASE_PATH={base_path.name}，OUTPUT_DIR={output_dir.name}")
 
-
+summary_lines = []
 # === 脚本 ===
 scripts = [
     "Drts.py",
@@ -70,7 +70,24 @@ def run_all_scripts():
     # 运行 check_solution.py（假设在项目根目录）
     check_script = SRC / "check_solution.py"
     print(f"\n▶ 运行：check_solution.py")
-    result = subprocess.run([sys.executable, str(check_script), folder.name], check=True)
+
+    #result = subprocess.run([sys.executable, str(check_script), folder.name], check=True)
+    args = [sys.executable, str(check_script), folder.name]
+
+    # ✅ 捕获 check_solution 的输出
+    result = subprocess.run(args, capture_output=True, text=True)
+    if result.returncode != 0:
+        print("❌ check_solution.py 出错")
+        return False
+
+    # ✅ 提取 [SUMMARY] 行
+    for line in result.stdout.splitlines():
+        if line.startswith("[SUMMARY]"):
+            summary_lines.append(line.replace("[SUMMARY]", "").strip())
+
+
+
+
     if result.returncode != 0:
         print("❌ check_solution.py 出错")
         return False
@@ -92,3 +109,11 @@ for idx, folder in enumerate(case_folders, 1):
         break
 
 print("\n✅ 所有测试完成！")
+
+
+with RESULT_FILE.open("a", encoding="utf-8") as f:
+    f.write("\n📊 多轮测试汇总：\n")
+    f.write("| Case Name | Total Tasks | Missed Tasks | Task Success | Components Missed |\n")
+    f.write("|-----------|--------------|---------------|----------------|---------------------|\n")
+    for line in summary_lines:
+        f.write(line + "\n")

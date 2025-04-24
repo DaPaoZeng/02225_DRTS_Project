@@ -37,12 +37,18 @@ def main():
 
     df = pd.read_csv(analysis_path)
     print(f"=== Half‑Half 转换：读取 {analysis_path} 共 {len(df)} 行 ===")
+    task_df = pd.read_csv(config.PREPROCESSED_TASKS_PATH) #加载任务表
 
     rows = []
     for idx, row in df.iterrows():
         comp_id = row["component_id"]
         alpha = row["alpha"]
         delta = row["delta"]
+        #计算当前组件负载：报告中展示任务总负载与α的对比，判断α是否过度保守或紧张，可辅助判断 α 合理性
+        df_tasks = task_df[task_df["component_id"] == comp_id]
+        load = sum(df_tasks["wcet"] / df_tasks["period"])
+        load = round(load, 3)
+
         schedulable = bool(row["schedulable"])
         scheduler = row["scheduler"].strip().upper()
         core_id = row["core_id"]
@@ -61,8 +67,9 @@ def main():
                 "scheduler": scheduler,
                 "Q": Q,
                 "P": P,
+                "load": load
             })
-            print(f"[OK] {comp_id:<15} α={alpha:<4} Δ={delta:<3} ⇒ Q={Q:<6} P={P:<6}")
+            print(f"[OK] {comp_id:<15} α={alpha:<4} Δ={delta:<3} ⇒ Q={Q:<6} P={P:<6}  load={load}")
         except ValueError as e:
             print(f"[ERR] {comp_id}: {e}")
 
