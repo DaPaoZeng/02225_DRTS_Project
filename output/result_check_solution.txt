@@ -1,4 +1,4 @@
-📄 check_solution.py 运行记录
+📄 check_solution.py Execution Log
 
 ============================================================
 📂 Test Case：1-tiny-test-case
@@ -286,6 +286,7 @@ Task scheduling success rate per component:
   - Ultraviolet_Sensor   : 87.50%
   - Vibration_Sensor     : 100.00%
 ✘ Some tasks missed their deadlines
+
  
  
 |----------------------------------------------------------------------------------------------------|
