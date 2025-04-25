@@ -1,8 +1,8 @@
-📄 check_solution.py Execution Log
+📄 check_solution.py 运行记录
 
 ============================================================
 📂 Test Case：1-tiny-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:21.733692
+🧪 Runtime of check_solutiond: 2025-04-25 09:24:59.482055
 ============================================================
 Total number of tasks        : 2
 Number of deadline-miss tasks: 0
@@ -15,7 +15,7 @@ All tasks schedulable 🎉
 
 ============================================================
 📂 Test Case：2-small-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:25.345123
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:03.150486
 ============================================================
 Total number of tasks        : 9
 Number of deadline-miss tasks: 1
@@ -33,7 +33,7 @@ Task scheduling success rate per component:
 
 ============================================================
 📂 Test Case：3-medium-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:29.224773
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:07.112954
 ============================================================
 Total number of tasks        : 18
 Number of deadline-miss tasks: 2
@@ -54,7 +54,7 @@ Task scheduling success rate per component:
 
 ============================================================
 📂 Test Case：4-large-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:34.241158
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:12.144110
 ============================================================
 Total number of tasks        : 28
 Number of deadline-miss tasks: 6
@@ -81,7 +81,7 @@ Task scheduling success rate per component:
 
 ============================================================
 📂 Test Case：5-huge-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:40.285362
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:18.202554
 ============================================================
 Total number of tasks        : 61
 Number of deadline-miss tasks: 3
@@ -117,7 +117,7 @@ Task scheduling success rate per component:
 
 ============================================================
 📂 Test Case：6-gigantic-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:46.943354
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:25.010390
 ============================================================
 Total number of tasks        : 115
 Number of deadline-miss tasks: 1
@@ -167,7 +167,7 @@ Task scheduling success rate per component:
 
 ============================================================
 📂 Test Case：7-unschedulable-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:50.564255
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:28.615647
 ============================================================
 Total number of tasks        : 15
 Number of deadline-miss tasks: 0
@@ -184,7 +184,7 @@ All tasks schedulable 🎉
 
 ============================================================
 📂 Test Case：8-unschedulable-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:54.297438
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:32.435167
 ============================================================
 Total number of tasks        : 28
 Number of deadline-miss tasks: 2
@@ -208,7 +208,7 @@ Task scheduling success rate per component:
 
 ============================================================
 📂 Test Case：9-unschedulable-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:54:59.496833
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:38.568978
 ============================================================
 Total number of tasks        : 61
 Number of deadline-miss tasks: 0
@@ -238,7 +238,7 @@ All tasks schedulable 🎉
 
 ============================================================
 📂 Test Case：10-unschedulable-test-case
-🧪 Runtime of check_solutiond: 2025-04-25 08:55:05.453472
+🧪 Runtime of check_solutiond: 2025-04-25 09:25:45.123436
 ============================================================
 Total number of tasks        : 115
 Number of deadline-miss tasks: 2
@@ -286,17 +286,20 @@ Task scheduling success rate per component:
   - Ultraviolet_Sensor   : 87.50%
   - Vibration_Sensor     : 100.00%
 ✘ Some tasks missed their deadlines
-
-📊 Summary of Multiple Test Cases:
-| Case Name | Total Tasks | Missed Tasks | Task Success | Components Missed |
-|-----------|--------------|---------------|----------------|---------------------|
-| 1-tiny-test-case | 2 | 0 | 100.00% | 0 |
-| 2-small-test-case | 9 | 1 | 88.89% | 1 |
-| 3-medium-test-case | 18 | 2 | 88.89% | 2 |
-| 4-large-test-case | 28 | 6 | 78.57% | 3 |
-| 5-huge-test-case | 61 | 3 | 95.08% | 2 |
-| 6-gigantic-test-case | 115 | 1 | 99.13% | 1 |
-| 7-unschedulable-test-case | 15 | 0 | 100.00% | 0 |
-| 8-unschedulable-test-case | 28 | 2 | 92.86% | 2 |
-| 9-unschedulable-test-case | 61 | 0 | 100.00% | 0 |
-| 10-unschedulable-test-case | 115 | 2 | 98.26% | 2 |
+ 
+ 
+|----------------------------------------------------------------------------------------------------|
+|                                   Summary of the 10 Test Cases                                     |
+|----------------------------------------------------------------------------------------------------|
+| Case Name                   | Total Tasks  | Missed Tasks  | Task Success    | Components Missed   |
+|-----------------------------|--------------|---------------|-----------------|---------------------|
+| 1-tiny-test-case            |            2 |             0 |         100.00% |                   0 |
+| 2-small-test-case           |            9 |             1 |          88.89% |                   1 |
+| 3-medium-test-case          |           18 |             2 |          88.89% |                   2 |
+| 4-large-test-case           |           28 |             6 |          78.57% |                   3 |
+| 5-huge-test-case            |           61 |             3 |          95.08% |                   2 |
+| 6-gigantic-test-case        |          115 |             1 |          99.13% |                   1 |
+| 7-unschedulable-test-case   |           15 |             0 |         100.00% |                   0 |
+| 8-unschedulable-test-case   |           28 |             2 |          92.86% |                   2 |
+| 9-unschedulable-test-case   |           61 |             0 |         100.00% |                   0 |
+| 10-unschedulable-test-case  |          115 |             2 |          98.26% |                   2 |

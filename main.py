@@ -112,8 +112,12 @@ print("\n✅ All test cases completed!")
 
 
 with RESULT_FILE.open("a", encoding="utf-8") as f:
-    f.write("\n📊 Summary of Multiple Test Cases:\n")
-    f.write("| Case Name | Total Tasks | Missed Tasks | Task Success | Components Missed |\n")
-    f.write("|-----------|--------------|---------------|----------------|---------------------|\n")
+    f.write(" \n")
+    f.write(" \n")
+    f.write("|----------------------------------------------------------------------------------------------------|\n")
+    f.write("|                                   Summary of the 10 Test Cases                                     |\n")
+    f.write("|----------------------------------------------------------------------------------------------------|\n")
+    f.write("| Case Name                   | Total Tasks  | Missed Tasks  | Task Success    | Components Missed   |\n")
+    f.write("|-----------------------------|--------------|---------------|-----------------|---------------------|\n")
     for line in summary_lines:
         f.write(line + "\n")

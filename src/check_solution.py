@@ -58,4 +58,13 @@ with open(output_path, "a", encoding="utf-8") as f:
 
 
 # 向 stdout 打印当前 case 的 Markdown 汇总行（供 main.py 捕获）
-print(f"[SUMMARY] | {case_name} | {n_task} | {n_task_bad} | {100.0 * (1 - n_task_bad / n_task):.2f}% | {n_comp_bad} |")
+# print(f"[SUMMARY] | {case_name} | {n_task} | {n_task_bad} | {100.0 * (1 - n_task_bad / n_task):.2f}% | {n_comp_bad} |")
+summary_line = (
+    f"[SUMMARY] | "
+    f"{case_name.ljust(28)}| "
+    f"{str(n_task).rjust(12)} | "
+    f"{str(n_task_bad).rjust(13)} | "
+    f"{task_success_rate:>14.2f}% | "
+    f"{str(n_comp_bad).rjust(19)} |"
+)
+print(summary_line)
