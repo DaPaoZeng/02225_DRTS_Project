@@ -94,9 +94,9 @@ def run_all_scripts():
     return True
 
 
-# === 4) 主流程 ===
+# === 4) Main Execution Loop ===
 for idx, folder in enumerate(case_folders, 1):
-    print(f"\n🔁 第 {idx} 个测试子文件夹：{folder.name}")
+    print(f"\n🔁 Running test case folder {idx}: {folder.name}")
 
     out_dir = OUTPUT_ROOT / folder.name
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -105,14 +105,14 @@ for idx, folder in enumerate(case_folders, 1):
 
     success = run_all_scripts()
     if not success:
-        print(f"!!! 停止于第 {idx} 个子文件夹 {folder.name}")
+        print(f"!!! Stopped at test case folder {idx}: {folder.name}")
         break
 
-print("\n✅ 所有测试完成！")
+print("\n✅ All test cases completed!")
 
 
 with RESULT_FILE.open("a", encoding="utf-8") as f:
-    f.write("\n📊 多轮测试汇总：\n")
+    f.write("\n📊 Summary of Multiple Test Cases:\n")
     f.write("| Case Name | Total Tasks | Missed Tasks | Task Success | Components Missed |\n")
     f.write("|-----------|--------------|---------------|----------------|---------------------|\n")
     for line in summary_lines:
