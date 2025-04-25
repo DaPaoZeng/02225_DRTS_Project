@@ -287,7 +287,8 @@ Task scheduling success rate per component:
   - Vibration_Sensor     : 100.00%
 ✘ Some tasks missed their deadlines
 
- 
+
+
  
 |----------------------------------------------------------------------------------------------------|
 |                                   Summary of the 10 Test Cases                                     |
