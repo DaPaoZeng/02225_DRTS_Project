@@ -49,18 +49,25 @@ def n_jobs_implicit_deadline(t: int, T: float) -> int:
 
 
 def dbf_edf(tasks, t):
-    return sum(n_jobs_implicit_deadline(t, T) * C for C, T in tasks)
+    total = 0
+    for C, T, D in tasks:
+        if t >= D:
+            n = math.floor((t - D) / T) + 1
+            total += n * C
+    return total
 
 
 
 def dbf_rm(tasks_sorted_by_priority, t):
-    """tasks 已按 RM 优先级从高到低排序。返回 max_i dbf_i(t)。"""
+    # tasks = [(C,T,D), ...] 已按 RM 优先级高→低
     worst = 0.0
-    for idx in range(len(tasks_sorted_by_priority)):
+    for i in range(len(tasks_sorted_by_priority)):
         demand = 0.0
-        for j in range(idx + 1):  # high‑or‑equal priority (自任务含在内)
-            C_j, T_j = tasks_sorted_by_priority[j]
-            demand += n_jobs_implicit_deadline(t, T_j) * C_j
+        for j in range(i + 1):
+            C, T, D = tasks_sorted_by_priority[j]
+            if t >= D:
+                n = math.floor((t - D) / T) + 1
+                demand += n * C
         worst = max(worst, demand)
     return worst
 
@@ -75,7 +82,14 @@ def analyze_component(df_comp: pd.DataFrame):
     # RM 任务需按优先级排序（priority 列数值越小优先级越高）
     if scheduler == "RM":
         df_comp = df_comp.sort_values("priority")
-    tasks = list(zip(df_comp["wcet"], df_comp["period"]))
+        # —— 合法性检查：Period 越小 priority 应越高
+        if not df_comp.sort_values("period")["priority"].is_monotonic_increasing:
+            print(f"⚠️  {comp_id}: RM priority 与 period 不一致 → 退化为 EDF 分析")
+            scheduler = "EDF"  # 用最保守公式
+    # 若没有 deadline 列则按要求补 = period
+    if "deadline" not in df_comp.columns:
+        df_comp["deadline"] = df_comp["period"]
+    tasks = list(zip(df_comp["wcet"], df_comp["period"], df_comp["deadline"]))
 
 
     #max_period = df_comp["period"].max()
@@ -98,8 +112,11 @@ def analyze_component(df_comp: pd.DataFrame):
     test_points = range(1, int(max_t) + 1)
 
     print(f"\n[COMP] {comp_id}  sched={scheduler}  tasks={len(tasks)}  max_t={max_t}")
-    for idx, (C, T) in enumerate(tasks, 1):
-        print(f"       └─ Task{idx}: C={C}, T={T}")
+    for idx, (C, T, D) in enumerate(tasks, 1):
+        util = C / T  # 单任务利用率
+        bar = "█" * int(util * 20)  # 0-1 → 0-20 格
+        print(f"       └─ Task{idx:<2}: C={C:<4} T={T:<4} D={D:<4} "
+              f"U={util:4.2f} {bar}")
 
     best = None  # (Δ,α)
     for delta in range(DELTA_MAX + 1):
@@ -167,15 +184,21 @@ def plot_dbf_vs_sbf(comp_id, scheduler, tasks, alpha, delta, max_t):
 # --------------------------------------------------
 
 def main():
+
     df = pd.read_csv(config.PREPROCESSED_TASKS_PATH)
     print(f"=== Analyzer 启动：读取 {len(df)} task‑rows ===")
 
     results = []
     for comp_id, group in df.groupby("component_id"):
         ok, alpha, delta = analyze_component(group)
+        # ---------- 组件级结论 ----------
+        print(f"▶ 组件 {comp_id:<20}……"
+              f"{'可调度' if ok else '不可调度'}"
+              f"  (α={alpha if alpha is not None else '-'}, Δ={delta if delta is not None else '-'})")
+
         if ok:
             scheduler = group["scheduler"].iloc[0].strip().upper()
-            tasks = list(zip(group["wcet"], group["period"]))
+            tasks = list(zip(group["wcet"], group["period"], group.get("deadline", group["period"])))
             max_period = group["period"].max()
             max_t = max_period * TEST_HORIZON_FACTOR
             plot_dbf_vs_sbf(comp_id, scheduler, tasks, alpha, delta, max_t)
@@ -212,12 +235,18 @@ def main():
     # 找出 Σα > 1.01 的核心
     overloaded_cores = {cid: load for cid, load in core_load.items() if load > 1.01}
 
+    # ---------- 核心 Σα 汇总 ----------
+    print("\n=== Core α 汇总 ===")
+    for cid, load in core_load.items():
+        flag = "↑超载" if load > 1.01 else " OK "
+        print(f"   • {cid:<8}: Σα = {load:4.2f}  {flag}")
+
     if overloaded_cores:
-        print("\n🚨 系统级检测：以下核心超载 (Σα > 1):")
+        print("\n🚨 进行核心利用率检查……失败 (Σα > 1):")
         for cid, load in overloaded_cores.items():
             print(f"   • {cid}: Σα = {load:.2f}")
     else:
-        print("\n✅ 系统级检测：没有核心超载")
+        print("✅ 进行核心利用率检查……通过")
 
     # 把标记写回每条结果
     for r in results:
@@ -299,9 +328,9 @@ def main():
         interface_unsched = _util_check(core_supplies)
 
     if interface_unsched:
-        print("\n🚨 接口可调度性失败核心:", ", ".join(interface_unsched))
+        print("🚨 进行接口可调度性检查……失败(失败核心:", ", ".join(interface_unsched))
     else:
-        print("\n✅ 接口可调度性全部通过")
+        print("✅ 进行接口可调度性检查……通过")
 
     for r in results:
         r["interface_unsched"] = r["core_id"] in interface_unsched
@@ -354,7 +383,6 @@ def main():
 
             # ---------- ★ 父预算覆盖实际比对 ★ ----------
             violate_any = False
-            print("\n🔍 父接口预算覆盖检查")
             for r in results:
                 need_a, need_d = r["alpha"], r["delta"]
                 cid = r["component_id"]
@@ -369,9 +397,10 @@ def main():
                     violate_any = True
                     r["system_schedulable"] = False
                     print(f"   • {cid}: 需求(α={need_a:.2f},Δ={need_d}) > 预算(α={bud_a:.2f},Δ={bud_d}) ❌")
-
+            if violate_any:
+                print("🚨 进行父预算覆盖检查……失败")
             if not violate_any:
-                print("   ✔ 全部子组件需求被父预算覆盖")
+                print("✅ 进行父预算覆盖检查……通过(全部子组件需求被父预算覆盖)")
             # ---------- ★ 比对结束 ★ ----------
 
 
@@ -382,10 +411,12 @@ def main():
         print("\nℹ️ 未找到 budgets.csv，跳过父预算检查")
         for r in results: r["budget_violate"] = None
 
+
+
     # ====== ★ Case 总体可调度性 ★ ======
     case_schedulable = all(r["system_schedulable"] for r in results)
-    print("\n🌟 Case verdict:",
-          " SCHEDULABLE ✅" if case_schedulable else "UNSCHEDULABLE ❌")
+    print("Case verdict:",
+          "✅ SCHEDULABLE" if case_schedulable else "❌ UNSCHEDULABLE")
     for r in results:
         r["case_schedulable"] = case_schedulable
 
@@ -393,7 +424,7 @@ def main():
 
     os.makedirs(os.path.dirname(config.ANALYSIS_RESULT_PATH), exist_ok=True)
     pd.DataFrame(results).to_csv(config.ANALYSIS_RESULT_PATH, index=False)
-    print(f"\n✅ 分析完成，结果写入 {config.ANALYSIS_RESULT_PATH}\n")
+    print(f"\n分析完成，结果写入 {config.ANALYSIS_RESULT_PATH}\n")
 
 
 
