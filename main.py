@@ -13,7 +13,7 @@ OUTPUT_ROOT = ROOT / "output"
 # === 初始化 result_check_solution.txt 文件 ===
 RESULT_FILE = OUTPUT_ROOT / "result_check_solution.txt"
 if not RESULT_FILE.exists():
-    RESULT_FILE.write_text("📄 check_solution.py 运行记录\n", encoding="utf-8")
+    RESULT_FILE.write_text("📄 check_solution.py execution log\n", encoding="utf-8")
 
 # 获取子文件夹列表
 def natural_key(f):
@@ -121,3 +121,4 @@ with RESULT_FILE.open("a", encoding="utf-8") as f:
     f.write("|-----------------------------|--------------|---------------|-----------------|---------------------|\n")
     for line in summary_lines:
         f.write(line + "\n")
+    f.write("|----------------------------------------------------------------------------------------------------|\n")
