@@ -1,7 +1,0 @@
-component_id,core_id,scheduler,alpha,delta,schedulable,core_overloaded,system_schedulable,interface_unsched,budget_violate,case_schedulable
-Camera_Sensor,Core_1,RM,0.29,0.0,True,False,True,False,False,False
-Communication_Unit,Core_3,RM,0.35,0.0,True,False,True,False,False,False
-GPS_Sensor,Core_3,RM,0.17,0.0,True,False,True,False,False,False
-Image_Processor,Core_1,EDF,0.44,0.0,True,False,True,False,False,False
-Lidar_Sensor,Core_2,RM,,,False,True,False,False,,False
-Proximity_Sensor,Core_4,EDF,0.29,0.0,True,False,True,False,False,False

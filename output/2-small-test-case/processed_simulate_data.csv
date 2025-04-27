@@ -1,0 +1,10 @@
+task_name,component_id,core_id,period,wcet_effective,priority
+Task_0,Camera_Sensor,Core_1,150,4.838709677419355,1
+Task_1,Camera_Sensor,Core_1,200,45.16129032258065,2
+Task_2,Camera_Sensor,Core_1,50,3.2258064516129035,0
+Task_3,Camera_Sensor,Core_1,300,38.70967741935484,3
+Task_4,Image_Processor,Core_1,200,3.2258064516129035,
+Task_5,Image_Processor,Core_1,200,17.741935483870968,
+Task_6,Image_Processor,Core_1,400,27.419354838709676,
+Task_7,Image_Processor,Core_1,300,20.967741935483872,
+Task_8,Image_Processor,Core_1,150,4.838709677419355,

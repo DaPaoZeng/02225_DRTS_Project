@@ -1,0 +1,3 @@
+task_name,component_id,core_id,period,wcet_effective,priority
+Task_0,Camera_Sensor,Core_1,50,22.580645161290324,0
+Task_1,Camera_Sensor,Core_1,100,53.225806451612904,1

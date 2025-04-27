@@ -1,3 +1,0 @@
-task_name,component_id,task_schedulable,avg_response_time,max_response_time,component_schedulable
-Task_0,Camera_Sensor,1,22.58,22.580645161290704,1
-Task_1,Camera_Sensor,1,99.23,99.22580645161293,1

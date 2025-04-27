@@ -1,3 +1,0 @@
-component_id,scheduler,core_id,task_name,wcet,period,priority
-Camera_Sensor,RM,Core_1,Task_0,22.580645161290324,50.0,0
-Camera_Sensor,RM,Core_1,Task_1,53.225806451612904,100.0,1
