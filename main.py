@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import datetime
 import re
 import subprocess
 import sys
@@ -116,6 +117,7 @@ with RESULT_FILE.open("a", encoding="utf-8") as f:
     f.write(" \n")
     f.write("|----------------------------------------------------------------------------------------------------|\n")
     f.write("|                                   Summary of the 10 Test Cases                                     |\n")
+    f.write(f"|----------------------------Creation Time: {datetime.now()}-------------------------------|\n")
     f.write("|----------------------------------------------------------------------------------------------------|\n")
     f.write("| Case Name                   | Total Tasks  | Missed Tasks  | Task Success    | Components Missed   |\n")
     f.write("|-----------------------------|--------------|---------------|-----------------|---------------------|\n")

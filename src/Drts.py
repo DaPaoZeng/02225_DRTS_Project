@@ -79,6 +79,7 @@ def main():
         if core_id not in arch_map:
             raise ValueError(f"在 architecture.csv 中找不到 core_id={core_id}")
 
+#下面2行别动！
         speed = arch_map[core_id]["speed_factor"]
         adjusted_wcet = float(row["wcet"]) / float(speed)
 
