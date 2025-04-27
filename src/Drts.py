@@ -11,7 +11,7 @@ import config
 @dataclass
 class Task:
     name: str
-    wcet: float          # 已按 core speed 缩放
+    wcet_effective: float          # 已按 core speed 缩放
     period: float
     component_id: str
     priority: Optional[int]  # EDF 任务可为 None
@@ -81,11 +81,11 @@ def main():
 
 #下面2行别动！
         speed = arch_map[core_id]["speed_factor"]
-        adjusted_wcet = float(row["wcet"]) / float(speed)
+        adjusted_wcet = float(row["wcet_effective"]) / float(speed)
 
         task = Task(
             name=row["task_name"],
-            wcet=adjusted_wcet,
+            wcet_effective=adjusted_wcet,
             period=float(row["period"]),
             component_id=comp_id,
             priority=None if pd.isna(row["priority"]) else int(row["priority"]),
@@ -97,7 +97,7 @@ def main():
     for comp in components.values():
         print(f"[COMP] {comp.id:<15} sched={comp.scheduler:<3} core={comp.core_id}")
         for t in comp.sorted_tasks():
-            print(f"       └─ {t.name:<20} WCET={t.wcet:<6.2f}  P={t.period:<5}  prio={t.priority}")
+            print(f"       └─ {t.name:<20} wcet_effective={t.wcet_effective:<6.2f}  P={t.period:<5}  prio={t.priority}")
 
     # ---------- Emit CSV ----------
     output_rows = []
@@ -108,7 +108,7 @@ def main():
                 "scheduler": comp.scheduler,
                 "core_id": comp.core_id,
                 "task_name": task.name,
-                "wcet": task.wcet,
+                "wcet_effective": task.wcet_effective,
                 "period": task.period,
                 "priority": task.priority,
             }
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 2 | import | from typing import List, Dict, Optional | 为可选优先级引入 Optional
 3 | 读取 priority | priority=None if pd.isna(row["priority"]) else int(row["priority"]) | 若 CSV 中为空值，不再抛异常
 4 | load_architecture() | 检查缺失字段，返回 speed_factor + 顶层 scheduler | 提前暴露输入数据问题
-5 | WCET 调整 | adjusted_wcet = wcet / speed_factor | 把核速度折算进 WCET
+5 | wcet_effective 调整 | adjusted_wcet = wcet_effective / speed_factor | 把核速度折算进 wcet_effective
 6 | 写 CSV | 写文件逻辑移到最外层一次完成 | 修复原先重复写 N² 行
 7 | 任务排序 | Component.sorted_tasks() | RM 组件按优先级，EDF 保持原顺序
 8 | 目录保障 | os.makedirs(..., exist_ok=True) | 输出路径若不存在自动创建
