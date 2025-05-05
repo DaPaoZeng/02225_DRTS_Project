@@ -145,3 +145,7 @@ python src/simulate_full_auto.py
 # (可选) Step-5 快速检查
 python src/check_solution.py
 ```
+
+## 6. 问题
+# 分析器和模拟器哪一个是worst case？
+# 目前我们采用了好几种分析方法，case 7 始终是scheduled的，如果分析器是worst case，原因是什么？
