@@ -1,4 +1,0 @@
-component_id,scheduler,budget,period,core_id,priority,alpha,delta,task_name,wcet_effective
-Camera_Sensor,RM,84.0,84,Core_1,0,,,,
-Camera_Sensor,,,50,,0,,,Task_0,22.580645161290324
-Camera_Sensor,,,100,,1,,,Task_1,53.225806451612904
