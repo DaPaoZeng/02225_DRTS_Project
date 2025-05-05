@@ -1,5 +1,0 @@
-component_id,core_id,scheduler,Q,P,load
-Camera_Sensor,Core_1,RM,49.0,100.0,0.488
-Control_Unit,Core_2,EDF,64.0,100.0,0.64
-Image_Processor,Core_1,EDF,28.0,100.0,0.277
-Lidar_Sensor,Core_2,RM,22.0,100.0,0.218

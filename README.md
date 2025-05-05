@@ -9,6 +9,7 @@
 
 ## 2  项目要求与完成情况
 
+
 | 项目要求 | 已实现 |
 |----------|--------|
 | **工具开发**：计算周期/偶发任务的 WCRT | `analyzer.py` 解析 DBF/SBF，标出组件可调度区间 |
@@ -48,7 +49,7 @@
 │   ├── analyzer.py
 │   ├── solution_check.py
 │   ├── config.py
-│   ├── Drts.py
+│   ├── preprocess_data.py
 │   ├── sim.py
 │   └── simulate_full_auto.py
 └── main.py #批处理
@@ -130,7 +131,7 @@ python main.py
 方法2：
 ```bash
 # Step-1 预处理
-python src/Drts.py
+python src/preprocess_data.py
 #  → output/.../preprocessed_tasks.csv
 # Step-2 组件级分析
 python src/analyzer.py

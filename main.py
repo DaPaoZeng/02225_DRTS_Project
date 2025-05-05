@@ -52,7 +52,7 @@ def update_config(base_path: Path, output_dir: Path):
 summary_lines = []
 # === 脚本 ===
 scripts = [
-    "Drts.py",
+    "preprocess_data.py",
     "analyzer.py",
     "sim.py",
     "simulate_full_auto.py"
